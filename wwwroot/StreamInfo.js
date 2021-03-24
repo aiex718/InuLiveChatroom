@@ -34,7 +34,7 @@ var StreamInfoUrl = "http://" + document.location.hostname +":10500/api/streamin
 	stream_subtitle.innerHTML = data.subtitle;
 	stream_game.innerHTML = data.game;
 	
-	SocketConnect();
+	ChatConnect();
 	
 	}).fail(function() 
 	{

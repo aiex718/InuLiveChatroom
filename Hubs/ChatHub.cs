@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
@@ -12,6 +13,8 @@ namespace InuLiveServer.Hubs
 {
     public class ChatHub : Hub,IChatServer
     {
+        const String DefaultUserName="AnonymousUser";
+
         static ConcurrentDictionary<string,string> Cid_Username_Dict = new ConcurrentDictionary<string, string>();
         public event IChatServer.OnReceiveMsgEventHandler OnReceiveMsg;
         public event IChatServer.OnUserEventHandler OnUserJoin;
@@ -22,8 +25,17 @@ namespace InuLiveServer.Hubs
             var payload = JsonSerializer.Deserialize<ChatPayload>(message);
             if (payload!=null&& payload.IsValid())
             {
+                if(payload.payloadType==PayloadType.Login)
+                {
+                    var userName = payload.sender;
+                    var cid = Context.ConnectionId;
+
+                    if(Cid_Username_Dict.TryUpdate(cid,userName,DefaultUserName))
+                        OnUserJoin?.Invoke(this,userName);
+                }
+
                 if(payload.payloadType==PayloadType.Msg)
-                    await Clients.All.SendAsync("ReceiveMessage", user, message);
+                    await Clients.All.SendAsync("ReceiveMessage", user, message);                
                     
                 OnReceiveMsg?.Invoke(this,payload);
             }
@@ -31,12 +43,11 @@ namespace InuLiveServer.Hubs
 
         public override async Task OnConnectedAsync()        
         {
-            var userName = Context.User.Identity.Name;
             var cid = Context.ConnectionId;
-            if(String.IsNullOrEmpty(cid)==false &&String.IsNullOrEmpty(userName)==false )            
+            if(String.IsNullOrEmpty(cid)==false)            
             {
-                Cid_Username_Dict.TryAdd(Context.ConnectionId,userName);
-                OnUserJoin?.Invoke(this,userName);
+                Cid_Username_Dict.TryAdd(Context.ConnectionId,DefaultUserName);                
+                Console.WriteLine($"AnonymousUser connected cid:{cid}")
             }
 
             await base.OnConnectedAsync();

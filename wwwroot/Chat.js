@@ -11,8 +11,8 @@ var Colors = ['coral', 'orange','khaki',
 var NickName;
 var Color;
 
-var socket;
-var ChatWsConnUrl = "ws://" + document.location.hostname +":10500/chatws" ;
+//var socket;
+//var ChatWsConnUrl = "ws://" + document.location.hostname +":10500/chatws" ;
 
 window.addEventListener("resize", function() {	
 	ScrollToButtom();
@@ -159,11 +159,25 @@ function SocketSend(payload)
 	}
 };
 
-function SocketConnect() 
+"use strict";
+
+var ChatHubConn = new signalR.HubConnectionBuilder()
+							.withUrl("/chatHub")
+							.withAutomaticReconnect()
+							.build();
+
+async function ChatConnect() 
 {
 	PrintInfo("工讀生正在接線...");
-	socket = new WebSocket(ChatWsConnUrl);
-	
+	//socket = new WebSocket(ChatWsConnUrl);
+	try {
+        await ChatHubConn.start();
+        console.log("SignalR Connected.");
+    } catch (err) {
+        console.log(err);
+        setTimeout(start, 5000);
+    }
+
 	socket.onopen = function (event) 
 	{
 		PrintInfo("線接好了(ง๑ •̀_•́)ง");	
