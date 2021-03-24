@@ -17,33 +17,33 @@ namespace InuLiveServer.Core
     internal class InuChatBot
     {
         static readonly string HelpMsg="輸入 #語音內容 來說話";
-        WSChatServer wsChatServer;
+        IChatServer ChatServer;
         GoogleTTSService TTSService;
 
-        public InuChatBot(WSChatServer chatServer)
+        public InuChatBot(IChatServer chatServer)
         {
             TTSService = new GoogleTTSService();
             TTSService.StartSpeech();
 
-            wsChatServer = chatServer;
-            wsChatServer.OnUserJoin += OnUserJoin;
-            wsChatServer.OnUserLeave += OnUserLeave;
-            wsChatServer.OnReceiveMsg += OnReceiveMsg;
+            ChatServer = chatServer;
+            ChatServer.OnUserJoin += OnUserJoin;
+            ChatServer.OnUserLeave += OnUserLeave;
+            ChatServer.OnReceiveMsg += OnReceiveMsg;
         }
 
         async void OnUserJoin(object sender, string username)
         {
             var response = GenerateResponse(username+" 加入聊天室");
-            await wsChatServer.Send(response);
+            await ChatServer.SendAsync(response);
 
             var help = GenerateResponse(HelpMsg);
-            await wsChatServer.Send(help,username);
+            await ChatServer.SendAsync(help,username);
         }
 
         async void OnUserLeave(object sender, string username)
         {
             var response = GenerateResponse(username+" 離開聊天室");
-            await wsChatServer.Send(response);
+            await ChatServer.SendAsync(response);
         }
 
         async void OnReceiveMsg(object sender, ChatPayload payload)
@@ -56,13 +56,13 @@ namespace InuLiveServer.Core
             if (payload.message.Contains("@help"))
             {
                 var help = GenerateResponse(HelpMsg);
-                await wsChatServer.Send(help,payload.sender);
+                await ChatServer.SendAsync(help,payload.sender);
             }
             
             if (payload.message.Contains("bot"))
             {
                 var response = GenerateResponse("汪 ∪･ω･∪");
-                await wsChatServer.Send(response);
+                await ChatServer.SendAsync(response);
             }
         }
 

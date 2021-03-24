@@ -15,6 +15,7 @@ using InuLiveServer.Models;
 using Microsoft.AspNetCore.Http;
 using System.Threading;
 using InuLiveServer.Core;
+using InuLiveServer.Hubs;
 
 namespace InuLiveServer
 {
@@ -30,6 +31,7 @@ namespace InuLiveServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSignalR();
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy", policy =>
@@ -49,15 +51,15 @@ namespace InuLiveServer
                 app.UseDeveloperExceptionPage();
             }
 
-            var webSocketOptions = new WebSocketOptions() 
-            {
-                KeepAliveInterval = TimeSpan.FromSeconds(60),
-                ReceiveBufferSize = 4 * 1024
-            };
+            // var webSocketOptions = new WebSocketOptions() 
+            // {
+            //     KeepAliveInterval = TimeSpan.FromSeconds(60),
+            //     ReceiveBufferSize = 4 * 1024
+            // };
             //webSocketOptions.AllowedOrigins.Add("https://inuyasha.pw");
             //webSocketOptions.AllowedOrigins.Add("https://www.inuyasha.pw");
             //webSocketOptions.AllowedOrigins.Add("https://live.inuyasha.pw");
-            app.UseWebSockets(webSocketOptions);
+            //app.UseWebSockets(webSocketOptions);
             
             app.UseCors("CorsPolicy");
             app.UseDefaultFiles();
@@ -69,28 +71,29 @@ namespace InuLiveServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/chathub");
             });
 
-            app.Use(async (context, next) =>
-            {
-                if (context.Request.Path == "/chatws")
-                {
-                    if (context.WebSockets.IsWebSocketRequest)
-                    {
-                        WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                        await Program.wsChatServer.Receive(context, webSocket);
-                    }
-                    else
-                    {
-                        context.Response.StatusCode = 400;
-                    }
-                }
-                else
-                {
-                    await next();
-                }
+            // app.Use(async (context, next) =>
+            // {
+            //     if (context.Request.Path == "/chatws")
+            //     {
+            //         if (context.WebSockets.IsWebSocketRequest)
+            //         {
+            //             WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+            //             await Program.wsChatServer.Receive(context, webSocket);
+            //         }
+            //         else
+            //         {
+            //             context.Response.StatusCode = 400;
+            //         }
+            //     }
+            //     else
+            //     {
+            //         await next();
+            //     }
 
-            });
+            // });
         }
 
         

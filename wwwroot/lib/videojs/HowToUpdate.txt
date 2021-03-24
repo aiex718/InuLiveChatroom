@@ -1,0 +1,10 @@
+Download Videojs at https://github.com/videojs/video.js/releases
+Extract all files to folder
+
+done
+
+
+following is obsolete
+
+then download videojs-http-streaming (VHS) library at https://github.com/videojs/http-streaming/releases
+copy "videojs-http-streaming.js" and "videojs-http-streaming.min.js" to folder

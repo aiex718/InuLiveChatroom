@@ -1,0 +1,48 @@
+.play-icon
+{
+	background-image:url(./res/icon/play-button.png);
+	background-size:20px,20px;
+}
+.pause-icon
+{
+	background-image:url(./res/icon/pause.png);
+	background-size:20px,20px;
+}
+.fullsrc-icon
+{
+	background-image:url(./res/icon/fullscreen.png);
+}
+.minimize-icon
+{
+	background-image:url(./res/icon/minimize.png);
+}
+.check-icon
+{
+	background-image:url(./res/icon/checkbox.png);
+	background-size:20px,20px;
+}
+.uncheck-icon
+{
+	background-image:url(./res/icon/uncheckbox.png);
+	background-size:20px,20px;
+}
+.speaker-icon
+{
+	background-image:url(./res/icon/speaker.png);
+}
+.mute-icon
+{
+	background-image:url(./res/icon/mute.png);
+}
+.largeview-icon
+{
+	background-image:url(./res/icon/largeview.png);
+}
+.windowview-icon
+{
+	background-image:url(./res/icon/defaultview.png);
+}
+.send-icon
+{
+	background-image:url(./res/icon/send.png);
+}

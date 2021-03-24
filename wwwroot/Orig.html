@@ -1,0 +1,129 @@
+<head>
+
+<title>Inuyasha Stream</title>
+<link rel="image_src" href="/poster/poster.jpg"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<meta property="og:title" content="EGOIST LIVE TOUR 2020 side-A chrysalizion code 404"/>
+<meta property="og:type" content="Game"/>
+<meta property="og:url" content="http://inuyasha.tw/live/"/>
+<meta property="og:image" content="http://inuyasha.tw/live/poster/poster.jpg"/>
+<meta property="og:site_name" content="Inuyasha Gaming Channel"/>
+<meta property="og:description" content="Inuyasha Gaming Channel"/>
+
+<!-- Players -->
+<script src="/live/lib/flvjs/flv.min.js"></script>
+<script src="/live/lib/hlsjs/hls.js"></script>
+<script src="/live/lib/videojs/video.min.js"></script>
+<link href="/live/lib/videojs/video-js.css" rel="stylesheet">
+
+</head>
+
+
+<body bgcolor="black" onload="OnLoad()" >	
+
+<table>
+　<tr>
+	<!-- Stream -->
+	<td>
+		<video id="videoElement" width=1280 height=720 poster="/live/poster/poster.jpg" controls  preload="auto">
+			<source src="http://inuyasha.tw:10501/inulive.m3u8", type="application/x-mpegURL">
+		</video>
+	</td>
+  
+    <!-- Chatroom -->
+	<td>		
+	<iframe id="IRCClient" src="about:blank" width="380" height="720" frameborder="0" scrolling="no"></iframe>
+	</td>	
+　</tr>
+  <tr>
+		<!--選擇播放器-->
+		<td style="width: 1280px ; height: 200px; vertical-align:top">
+			<font color="black" size="4" face="微軟正黑體"> 
+				<div id="PlayerMsg"> </div>
+			</font>
+		</td>	
+		
+		<!--選擇聊天室-->
+		<td style="width: 380px ; height: 20px; vertical-align:top">
+			<font color="white" size="5" face="Microsoft JhengHei">
+				<input name="SelectIrc" type ="radio" id="KiwiIrc" /> Kiwi 
+				<input name="SelectIrc" type ="radio" id="MibbitIrc"  /> Mibbit 
+				<input name="SelectIrc" type ="radio" id="FreenodeIrc" /> Freenode 
+			</font>
+			
+			<script>
+				var KiwiIrcUrl = 'https://kiwiirc.com/client/inuyasha.tw/?nick=Guest|?&theme=cli#chatroom';
+				var MibbitIrcUrl ='http://widget.mibbit.com/?settings=cc90cf99ea5875cfdb4686718b807081&server=Inuyasha.tw&channel=%23chatroom';
+				var FreenodeIrcUrl = 'http://webchat.freenode.net?channels=#InuyashaStream&uio=OT10cnVlJjExPTIzNg6b';
+				document.getElementById('KiwiIrc').onclick = function(){ ChangeIRCClient(KiwiIrcUrl) };
+				document.getElementById('MibbitIrc').onclick = function(){ ChangeIRCClient(MibbitIrcUrl) };
+				document.getElementById('FreenodeIrc').onclick = function(){ ChangeIRCClient(FreenodeIrcUrl) };
+			</script>
+        </td>
+		
+  </tr>
+
+
+</table>
+
+	<script>
+		<!-- document.getElementById('VideoPlayer').src = VideoUrl; -->
+		var div = document.getElementById("PlayerMsg");
+		var videoElement = document.getElementById('videoElement');
+		var PlayerFound = false;
+		
+		if (flvjs.isSupported() && !PlayerFound ) 
+		{
+			div.textContent = "flvjs";
+			PlayerFound=true;
+			
+			var flvPlayer = flvjs.createPlayer({
+				type: 'flv',
+				url: 'http://inuyasha.tw:10501/live?port=1935&app=live&stream=inulive'
+			});
+			flvPlayer.attachMediaElement(videoElement);
+			flvPlayer.load();
+			flvPlayer.play();
+		}
+		
+		
+		if(!PlayerFound) 
+		{
+			videoElement.classList.add("video-js");
+			var player = videojs('videoElement');
+			if(player.canPlayType('application/x-mpegURL'))
+			{
+				PlayerFound=true;
+				div.textContent = "videojs";
+				
+				player.play();
+			}
+			else
+				videoElement.classList.remove("video-js");
+		}
+		
+		if(Hls.isSupported() && !PlayerFound) 
+		{
+			PlayerFound=true;
+			div.textContent = "hlsjs";
+			
+			var hls = new Hls();
+			hls.loadSource('http://inuyasha.tw:10501/inulive.m3u8');
+			hls.attachMedia(videoElement);
+		}
+		
+		console.log("Selected player:"+div.textContent);
+		
+		function ChangeIRCClient(IrcUrl) 
+		{
+			document.getElementById('IRCClient').src = IrcUrl;
+		}
+		
+		function OnLoad()
+		{
+			document.getElementById('KiwiIrc').click();
+		}
+	</script>
+
+</body>

@@ -14,16 +14,13 @@ using System.Collections.Generic;
 
 namespace InuLiveServer.Core
 {
-    internal class WSChatServer
+    internal class WSChatServer:IChatServer
     {
         static readonly string AnonymousUserName="吃瓜群眾";
 
-        public delegate void OnReceiveMsgEventHandler(object sender, ChatPayload payload);
-        public event OnReceiveMsgEventHandler OnReceiveMsg;
-
-        public delegate void OnUserEventHandler(object sender, string username);
-        public event OnUserEventHandler OnUserJoin;
-        public event OnUserEventHandler OnUserLeave;
+        public event IChatServer.OnReceiveMsgEventHandler OnReceiveMsg;
+        public event IChatServer.OnUserEventHandler OnUserJoin;
+        public event IChatServer.OnUserEventHandler OnUserLeave;
 
         ConcurrentDictionary<WebSocket,string> WebSocket_Username_Dict;
 
@@ -31,7 +28,6 @@ namespace InuLiveServer.Core
         {
             WebSocket_Username_Dict = new ConcurrentDictionary<WebSocket, string>();
         }
-
 
         internal async Task Receive(HttpContext context, WebSocket webSocket)
         {
@@ -57,7 +53,7 @@ namespace InuLiveServer.Core
                     }
                     //Transmit to other
                     if(payload.payloadType == PayloadType.Msg)
-                        await Send(payload);
+                        await SendAsync(payload);
                     OnReceiveMsg?.Invoke(this,payload);    
                 }
                 else
@@ -72,7 +68,7 @@ namespace InuLiveServer.Core
             await CloseWebSocket(webSocket);
         }
 
-        public async Task Send(ChatPayload payload,string username=null)
+        public async Task SendAsync(ChatPayload payload,string username=null)
         {
             List<WebSocket> SelectedWS;
             if (String.IsNullOrEmpty(username)==false)
@@ -135,5 +131,9 @@ namespace InuLiveServer.Core
             }
         }
 
+        public IEnumerable<string> ListUser()
+        {
+            return WebSocket_Username_Dict.Values;
+        }
     }
 }

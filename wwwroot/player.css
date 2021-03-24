@@ -1,0 +1,170 @@
+.player-container, .demo{
+	position: relative;
+	margin: auto;
+	width: 100%;
+    height: 100%;
+}
+
+.video-barrage {
+    position: absolute;
+    background-color: black;
+    width: 100%;
+    height: 100%;
+    outline: 1px solid #eee;
+}
+
+.unmute-notify{
+	display:none;	
+	z-index: 300;
+	align-items: center;
+    background: #515151cc;
+    position: absolute;
+}
+
+.unmute-notify-text{
+    font-size: 28px;
+	color:#f7f7f7;
+}
+
+.canvas-barrage {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
+	pointer-events: none;
+}
+
+.control-panel {
+	position: absolute;
+	margin-bottom:5px;
+	width: 100%;
+	bottom: 0px;
+	z-index: 200;
+	opacity: 1;
+}
+
+.drop-shadow {
+	filter: drop-shadow(0px 0px 12px rgba(0,0,0,1))
+}
+
+
+.left-icon
+{
+	margin-left:5px;
+}
+
+.right-icon
+{
+	margin-right:5px;
+}
+
+.control-icon
+{
+	height:25px;
+	width:25px;
+	background-size: contain;
+	border:none;
+	background-color:transparent;
+	background-position:center;
+	background-repeat:no-repeat;
+	filter: invert(100%) sepia(3%) saturate(1403%) hue-rotate(190deg) brightness(110%) contrast(84%);
+	transition: 0.2s;
+}
+
+.control-icon:hover {
+	box-shadow: 0 0 11px rgba(33,33,33,.2); 
+    filter: invert(66%) sepia(36%) saturate(449%) hue-rotate(148deg) brightness(92%) contrast(90%);
+}
+
+.control-barrage-icon-label {
+	font-weight: bold;
+	font-size: 16px;
+	width: auto;
+    line-height: 0px;
+	background-position:center right;
+    padding-right: 30px;
+}
+
+.volume-bar
+{
+	height:25px;
+	width:80px;
+	background:transparent;
+	border:none;
+	filter: invert(0%) sepia(3%) saturate(1403%) hue-rotate(190deg) brightness(110%) contrast(84%);
+}
+.player-chat-area{
+	display:none;
+	max-width: calc((3 / 10) * 100%);
+}
+.player-chat-input{
+	height:25px;
+	width:500px;
+	resize: none !important;
+	
+	-moz-appearance: none;
+	-ms-overflow-style: none;
+	-webkit-appearance: none;	
+	appearance: none;
+	
+	border-radius: 4px !important;
+	
+	background-clip: padding-box;
+	background-color: #f9f4ff;	
+	border: 2px solid rgba(0,0,0,.05);
+	
+	overflow-y: hidden;
+	font-size: 12px;
+	opacity:0.7;
+	transition: 0.2s;
+}
+
+.player-chat-input:focus {
+	border: 2px solid #c697ff99;
+	opacity:1;
+}
+
+.player-chat-send-btn{
+	filter: invert(48%) sepia(10%) saturate(2167%) hue-rotate(237deg) brightness(86%) contrast(83%);
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  height: 5px;
+  cursor: pointer;
+  background: #878787;
+  border-radius: 1px;
+}
+input[type=range]::-webkit-slider-thumb {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: #e9e9e9;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top:-3.5px;
+}
+input[type=range]::-moz-range-track {
+	height: 5px;
+	cursor: pointer;
+	background: #878787;
+	border-radius: 1px;
+}
+input[type=range]::-moz-range-thumb {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  background: #e9e9e9;
+  cursor: pointer;
+  -webkit-appearance: none;
+  border:none;
+}
+
+
+
+

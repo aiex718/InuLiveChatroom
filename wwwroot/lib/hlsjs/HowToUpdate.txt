@@ -1,0 +1,3 @@
+download hls library at https://github.com/video-dev/hls.js/
+copy all files from \dist to folder
+done

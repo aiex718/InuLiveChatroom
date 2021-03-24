@@ -31,7 +31,8 @@ namespace InuLiveServer
             {
                 Console.WriteLine("Stream info not found");
                 streamInfo.ReadFromConsole();
-                streamInfo.Save();            
+                streamInfo.Save();
+                s            
             }
 
             Console.WriteLine("Using StreamInfo");
