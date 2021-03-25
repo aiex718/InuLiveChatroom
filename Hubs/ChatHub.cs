@@ -11,82 +11,25 @@ using System.Text.Json;
 
 namespace InuLiveServer.Hubs
 {
-    public class ChatHub : Hub,IChatServer
+    public class ChatHub : Hub
     {
-        const String DefaultUserName="AnonymousUser";
-
-        static ConcurrentDictionary<string,string> Cid_Username_Dict = new ConcurrentDictionary<string, string>();
-        public event IChatServer.OnReceiveMsgEventHandler OnReceiveMsg;
-        public event IChatServer.OnUserEventHandler OnUserJoin;
-        public event IChatServer.OnUserEventHandler OnUserLeave;
         
         public async Task SendMessage(string user, string message)
         {
-            var payload = JsonSerializer.Deserialize<ChatPayload>(message);
-            if (payload!=null&& payload.IsValid())
-            {
-                if(payload.payloadType==PayloadType.Login)
-                {
-                    var userName = payload.sender;
-                    var cid = Context.ConnectionId;
-
-                    if(Cid_Username_Dict.TryUpdate(cid,userName,DefaultUserName))
-                        OnUserJoin?.Invoke(this,userName);
-                }
-
-                if(payload.payloadType==PayloadType.Msg)
-                    await Clients.All.SendAsync("ReceiveMessage", user, message);                
-                    
-                OnReceiveMsg?.Invoke(this,payload);
-            }
+            await Program.chatServer.OnSendMessage(Context,user,message);
         }
 
         public override async Task OnConnectedAsync()        
         {
-            var cid = Context.ConnectionId;
-            if(String.IsNullOrEmpty(cid)==false)            
-            {
-                Cid_Username_Dict.TryAdd(Context.ConnectionId,DefaultUserName);                
-                Console.WriteLine($"AnonymousUser connected cid:{cid}")
-            }
-
-            await base.OnConnectedAsync();
+            await Program.chatServer.OnConnectedAsync(Context);
+            await base.OnConnectedAsync();     
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            var cid = Context.ConnectionId;
-            if(String.IsNullOrEmpty(cid)==false && Cid_Username_Dict.Keys.Contains(cid))            
-            {
-                Cid_Username_Dict.TryRemove(Context.ConnectionId,out var userName); 
-                OnUserLeave?.Invoke(this,userName);    
-            }
-
+            await Program.chatServer.OnDisconnectedAsync(Context, exception);
             await base.OnDisconnectedAsync(exception);
         }
-
-        async Task IChatServer.SendAsync(ChatPayload payload, string username = null)
-        {
-            var message = JsonSerializer.Serialize(payload);
-            IEnumerable<string> cids;
-
-            if (String.IsNullOrEmpty(username)==false)
-            {
-                cids = Cid_Username_Dict.Where(kvp=>kvp.Value==username).Select(kvp=>kvp.Key).ToList();
-                foreach(var cid in cids)
-                {
-                    await Clients.Client(cid).SendAsync("ReceiveMessage", payload.sender, message);
-                }
-            }
-            else
-            {
-                await Clients.All.SendAsync("ReceiveMessage", payload.sender, message);
-            }
-        }
-
-        IEnumerable<string> IChatServer.ListUser()
-        {
-            return Cid_Username_Dict.Values;
-        }
+        
     }
 }

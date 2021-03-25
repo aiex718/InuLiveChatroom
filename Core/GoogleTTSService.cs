@@ -15,8 +15,8 @@ namespace InuLiveServer.Core
     class GoogleTTSService 
     {
         Player player;
-        //string path = Path.GetTempPath() + "audio.mp3";
-        string path = "S:\\audio.mp3";
+        string path = Path.GetTempPath() + "audio.mp3";
+        //string path = "S:\\audio.mp3";
 
         BlockingCollection<string> BufferSpeechText;
         bool Enabled;

@@ -47,7 +47,7 @@ function OnJoinClick()
 		
 		playerchatsendbtn.disabled=false;
 		
-		SocketSend(CretePayload("HandShake","Login"));	
+		ChatSendPayload(CretePayload("HandShake","Login"));	
 	}
 	else
 		nicknameinput.style.border="2px solid #ff2f2f70";
@@ -73,7 +73,7 @@ function SendChat(text)
 {
 	if(NickName && text)
 	{
-		SocketSend(CretePayload(text));
+		ChatSendPayload(CretePayload(text));
 	}
 }
 
@@ -136,27 +136,25 @@ function PrintInfo(infotext)
 	ScrollToButtom();
 }
 
-function SocketClose() 
+function ChatClose() 
 {
-	if (!socket || socket.readyState !== WebSocket.OPEN) 
+	if (ChatHubConn) 
 	{
-		PrintInfo("socket not connected");
+		ChatHubConn.stop();
 	}
-	else
-		socket.close(1000, "Closing from client");
 };
 
-function SocketSend(payload) 
+function ChatSendPayload(payload) 
 {
-	if (!socket || socket.readyState !== WebSocket.OPEN) 
+	if (ChatHubConn && ChatHubConn.state==signalR.HubConnectionState.Connected) 
 	{
-		PrintInfo("socket not connected");
+		ChatHubConn.invoke("SendMessage", NickName, JSON.stringify(payload))
+		.catch(function (err) {
+			return console.error(err.toString());
+		});
 	}
 	else
-	{
-		var data = JSON.stringify(payload);
-		socket.send(data);
-	}
+		PrintInfo("尚未連接至聊天室");
 };
 
 "use strict";
@@ -165,38 +163,31 @@ var ChatHubConn = new signalR.HubConnectionBuilder()
 							.withUrl("/chatHub")
 							.withAutomaticReconnect()
 							.build();
+							
+ChatHubConn.onclose(function(){
+	PrintInfo("已離開聊天室");
+});
+ChatHubConn.onreconnecting(function(){
+	PrintInfo("踢到線了....");
+	PrintInfo("工讀生正在接線....");
+});
+ChatHubConn.onreconnected(function(){
+	PrintInfo("線接好了(ง๑ •̀_•́)ง");
+	if(NickName)
+		ChatSendPayload(CretePayload("HandShake","Login"));	
+});
+ChatHubConn.on("ReceiveMessage", function (user, message) {
+	PrintMessage(JSON.parse(message));
+});
 
 async function ChatConnect() 
 {
-	PrintInfo("工讀生正在接線...");
-	//socket = new WebSocket(ChatWsConnUrl);
 	try {
+		PrintInfo("工讀生正在接線....");
         await ChatHubConn.start();
-        console.log("SignalR Connected.");
+		PrintInfo("線接好了(ง๑ •̀_•́)ง");
     } catch (err) {
-        console.log(err);
-        setTimeout(start, 5000);
-    }
-
-	socket.onopen = function (event) 
-	{
-		PrintInfo("線接好了(ง๑ •̀_•́)ง");	
-	};
-	
-	socket.onclose = function (event) 
-	{
-		PrintInfo("踢到線了....");
-		
-		SocketConnect();
-	};
-	
-	socket.onerror =function (event) 
-	{
 		PrintInfo("工讀生已罷工");
-	};
-	
-	socket.onmessage = function (event) 
-	{
-		PrintMessage(JSON.parse(event.data));
-	};
+        console.log(err);
+    }
 };

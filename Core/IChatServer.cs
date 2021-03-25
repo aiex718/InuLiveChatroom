@@ -12,7 +12,7 @@ namespace InuLiveServer.Core
         delegate void OnUserEventHandler(object sender, string username);
         event OnUserEventHandler OnUserJoin;
         event OnUserEventHandler OnUserLeave;
-        Task SendAsync(ChatPayload payload,string username=null);
+        Task SendPayloadAsync(ChatPayload payload,string username=null);
         IEnumerable<string> ListUser();
     } 
 }

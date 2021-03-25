@@ -16,34 +16,48 @@ namespace InuLiveServer.Core
 {
     internal class InuChatBot
     {
-        static readonly string HelpMsg="輸入 #語音內容 來說話";
+        static readonly string HelpMsg="輸入 #語音內容 來說話，!who 查看線上使用者";
         IChatServer ChatServer;
         GoogleTTSService TTSService;
 
-        public InuChatBot(IChatServer chatServer)
+        public InuChatBot()
         {
             TTSService = new GoogleTTSService();
             TTSService.StartSpeech();
+        }
 
+        public void Attach(IChatServer chatServer)
+        {
             ChatServer = chatServer;
             ChatServer.OnUserJoin += OnUserJoin;
             ChatServer.OnUserLeave += OnUserLeave;
             ChatServer.OnReceiveMsg += OnReceiveMsg;
         }
 
+        public void Detach()
+        {
+            if(ChatServer!=null)
+            {
+                ChatServer.OnUserJoin -= OnUserJoin;
+                ChatServer.OnUserLeave -= OnUserLeave;
+                ChatServer.OnReceiveMsg -= OnReceiveMsg;
+                ChatServer=null;
+            }
+        }
+
         async void OnUserJoin(object sender, string username)
         {
             var response = GenerateResponse(username+" 加入聊天室");
-            await ChatServer.SendAsync(response);
+            await ChatServer.SendPayloadAsync(response);
 
             var help = GenerateResponse(HelpMsg);
-            await ChatServer.SendAsync(help,username);
+            await ChatServer.SendPayloadAsync(help,username);
         }
 
         async void OnUserLeave(object sender, string username)
         {
             var response = GenerateResponse(username+" 離開聊天室");
-            await ChatServer.SendAsync(response);
+            await ChatServer.SendPayloadAsync(response);
         }
 
         async void OnReceiveMsg(object sender, ChatPayload payload)
@@ -53,16 +67,23 @@ namespace InuLiveServer.Core
                 TTSService.QueueText(payload.message.Replace("#",""));
             }
 
-            if (payload.message.Contains("@help"))
+            else if (payload.message.StartsWith("!help"))
             {
                 var help = GenerateResponse(HelpMsg);
-                await ChatServer.SendAsync(help,payload.sender);
+                await ChatServer.SendPayloadAsync(help,payload.sender);
+            }
+
+            else if (payload.message.StartsWith("!who"))
+            {
+                var users =  ChatServer.ListUser().ToList();
+                var who = GenerateResponse($"現在線上人數為{users.Count}人 ,已登入使用者:{users.Aggregate((i, j) => i + ',' + j)}");
+                await ChatServer.SendPayloadAsync(who,payload.sender);
             }
             
-            if (payload.message.Contains("bot"))
+            else if (payload.message.Contains("bot"))
             {
                 var response = GenerateResponse("汪 ∪･ω･∪");
-                await ChatServer.SendAsync(response);
+                await ChatServer.SendPayloadAsync(response);
             }
         }
 

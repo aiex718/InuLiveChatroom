@@ -53,7 +53,7 @@ namespace InuLiveServer.Core
                     }
                     //Transmit to other
                     if(payload.payloadType == PayloadType.Msg)
-                        await SendAsync(payload);
+                        await SendPayloadAsync(payload);
                     OnReceiveMsg?.Invoke(this,payload);    
                 }
                 else
@@ -68,7 +68,7 @@ namespace InuLiveServer.Core
             await CloseWebSocket(webSocket);
         }
 
-        public async Task SendAsync(ChatPayload payload,string username=null)
+        public async Task SendPayloadAsync(ChatPayload payload,string username=null)
         {
             List<WebSocket> SelectedWS;
             if (String.IsNullOrEmpty(username)==false)

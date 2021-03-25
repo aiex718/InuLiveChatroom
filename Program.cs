@@ -14,6 +14,8 @@ using System.IO;
 using System.Net.WebSockets;
 using InuLiveServer.Models;
 using InuLiveServer.Core;
+using Microsoft.AspNetCore.SignalR;
+using InuLiveServer.Hubs;
 
 namespace InuLiveServer
 {
@@ -22,8 +24,9 @@ namespace InuLiveServer
         internal static StreamInfo streamInfo {get;private set;} = new StreamInfo();
         internal static int port = 10500;
 
-        internal static WSChatServer wsChatServer = new WSChatServer();
-
+        //internal static WSChatServer wsChatServer = new WSChatServer();
+        internal static readonly InuChatBot chatbot = new InuChatBot();
+        internal static readonly SignalRChatServer chatServer = new SignalRChatServer();
 
         static void Main(string[] args)
         {
@@ -37,13 +40,16 @@ namespace InuLiveServer
             Console.WriteLine("Using StreamInfo");
             streamInfo.Print();
 
-            InuChatBot chatbot = new InuChatBot(wsChatServer);
-
             var host = new WebHostBuilder()
                 .UseKestrel(options => {options.Listen(new IPAddress(0), port);})
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
                 .Build();
+
+            var hubContext = host.Services.GetService(typeof(IHubContext<ChatHub>));
+            
+            chatbot.Attach(chatServer);
+            chatServer.ConnectToHub(hubContext as IHubContext<ChatHub>);
 
             host.Run();
         }
