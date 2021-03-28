@@ -1,37 +1,43 @@
 var chatloginarea = document.getElementById("chatloginarea");
 var nicknameinput = document.getElementById("nicknameinput");
+var chatjoinbtn = document.getElementById("chatjoinbtn");
 var chatmessages = document.getElementById("chatmessages");
 var chatinput = document.getElementById("chatinput");
 
-var Colors = ['coral', 'orange','khaki',
+
+
+const ChatEvents = {'ReceiveChat':'ReceiveChat'};
+
+const Colors = ['coral', 'orange','khaki',
 'greenyellow','mediumseagreen','lightseagreen',
 'deepskyblue','mediumslateblue','mediumblue',
 'hotpink','darkslategray','chocolate'];
 
+var ConnUrl = "http://HOST:10500/chatHub";
+var ChatHubConn = new signalR.HubConnectionBuilder()
+							.withUrl(ConnUrl.replace("HOST",window.location.host))
+							.withAutomaticReconnect()
+							.build();
+
 var NickName;
 var Color;
 
-//var socket;
-//var ChatWsConnUrl = "ws://" + document.location.hostname +":10500/chatws" ;
-
-window.addEventListener("resize", function() {	
-	ScrollToButtom();
-});
-
-function ScrollToButtom()
-{
-	chatmessages.scrollTop = chatmessages.scrollHeight; 	
-}
-
+window.addEventListener("resize", ChatScrollToButtom);
 
 nicknameinput.addEventListener("keydown", function(event) 
 {
-	if (event.keyCode === 13) 
+	if (event.key == "Enter")
 	{
 		event.preventDefault();
 		OnJoinClick();
 	}
 });
+
+window.addEventListener('StreamInfoReady', function (e) {
+	nicknameinput.disabled=false;
+	nicknameinput.placeholder="輸入暱稱";
+	chatjoinbtn.disabled=false;
+}, false);
 
 function OnJoinClick()
 {
@@ -47,20 +53,28 @@ function OnJoinClick()
 		
 		playerchatsendbtn.disabled=false;
 		
-		ChatSendPayload(CretePayload("HandShake","Login"));	
+		ChatSendPayload(CreatePayload("HandShake","Login"));	
 	}
 	else
-		nicknameinput.style.border="2px solid #ff2f2f70";
+	{
+		nicknameinput.classList.add("wrong-input");
+	}
 }
 
 chatinput.addEventListener("keydown", function(event) 
 {
-	if (event.keyCode === 13) 
+	if (event.key == "Enter")
 	{
 		event.preventDefault();
 		OnChatSend();
 	}
 });
+
+function ChatScrollToButtom()
+{
+	chatmessages.scrollTop = chatmessages.scrollHeight; 	
+}
+
 
 function OnChatSend()
 {
@@ -73,11 +87,11 @@ function SendChat(text)
 {
 	if(NickName && text)
 	{
-		ChatSendPayload(CretePayload(text));
+		ChatSendPayload(CreatePayload(text));
 	}
 }
 
-function CretePayload(msg,t)
+function CreatePayload(msg,t)
 {
 	var payload={
 		color:Color,
@@ -115,11 +129,13 @@ function PrintMessage(payload)
 	chatDiv.appendChild(msgSpan);
 	
 	chatmessages.appendChild(chatDiv);
-	ScrollToButtom();
+	ChatScrollToButtom();
 	
 	if(payload.type.toLowerCase().includes("msg"))
-		AddBarrage(payload.message,payload.color);//barrage
-	
+	{
+		var evt = new CustomEvent(ChatEvents['ReceiveChat'], {'detail': payload});
+		window.dispatchEvent(evt);
+	}	
 }
 
 function PrintInfo(infotext)
@@ -133,7 +149,7 @@ function PrintInfo(infotext)
 	chatDiv.appendChild(msgSpan);
 	
 	chatmessages.appendChild(chatDiv);
-	ScrollToButtom();
+	ChatScrollToButtom();
 }
 
 function ChatClose() 
@@ -157,29 +173,6 @@ function ChatSendPayload(payload)
 		PrintInfo("尚未連接至聊天室");
 };
 
-"use strict";
-
-var ChatHubConn = new signalR.HubConnectionBuilder()
-							.withUrl("/chatHub")
-							.withAutomaticReconnect()
-							.build();
-							
-ChatHubConn.onclose(function(){
-	PrintInfo("已離開聊天室");
-});
-ChatHubConn.onreconnecting(function(){
-	PrintInfo("踢到線了....");
-	PrintInfo("工讀生正在接線....");
-});
-ChatHubConn.onreconnected(function(){
-	PrintInfo("線接好了(ง๑ •̀_•́)ง");
-	if(NickName)
-		ChatSendPayload(CretePayload("HandShake","Login"));	
-});
-ChatHubConn.on("ReceiveMessage", function (user, message) {
-	PrintMessage(JSON.parse(message));
-});
-
 async function ChatConnect() 
 {
 	try {
@@ -191,3 +184,26 @@ async function ChatConnect()
         console.log(err);
     }
 };
+
+"use strict";
+
+ChatHubConn.onclose(function(){
+	PrintInfo("已離開聊天室");
+});
+
+ChatHubConn.onreconnecting(function(){
+	PrintInfo("踢到線了....");
+	PrintInfo("工讀生正在接線....");
+});
+
+ChatHubConn.onreconnected(function(){
+	PrintInfo("線接好了(ง๑ •̀_•́)ง");
+	if(NickName)
+		ChatSendPayload(CreatePayload("HandShake","Login"));	
+});
+
+ChatHubConn.on("ReceiveMessage", function (user, message) {
+	PrintMessage(JSON.parse(message));
+});
+
+

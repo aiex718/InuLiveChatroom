@@ -64,7 +64,7 @@ namespace InuLiveServer.Core
             if(String.IsNullOrEmpty(cid)==false)            
             {
                 Cid_Username_Dict.TryAdd(context.ConnectionId,DefaultUserName);                
-                Console.WriteLine($"AnonymousUser connected cid:{cid}");
+                Console.WriteLine($"{DefaultUserName} connected cid:{cid}");
             }
    
         }

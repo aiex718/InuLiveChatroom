@@ -32,7 +32,6 @@ var demoBarrage = new CanvasBarrage(canvasBarrage, videoBarrage, {
 $(document).ready(function() {
 	SetControlVisible(true);
 	ResizeChatInput();
-	FindPlayer();
 });
 
 unmutenotify.addEventListener("click", function( event ) {
@@ -77,9 +76,10 @@ videoBarrage.addEventListener("click", OnPlayClick, false);
 
 window.addEventListener("resize", function() {	
 	ResizeChatInput();
+	resetCanvasSize();
 });
 
-function FindPlayer()
+function StartPlayer()
 {
 	var httpflvUrl = 'http://'+ document.location.hostname +':10501/live?port=1935&app=live&stream=inulive';
 	var hlsUrl = 'http://'+ document.location.hostname +':10501/inulive.m3u8';
@@ -252,7 +252,6 @@ function SetVolume(val)
 	videoBarrage.volume = parseInt(val) / 100;
 	RefreshPlayerIcon();
 }
-
 
 function SetControlVisible(val)
 {

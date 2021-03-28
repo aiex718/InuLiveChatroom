@@ -69,6 +69,12 @@ body::-webkit-scrollbar {
     user-select: none;
 }
 
+.wrong-input{
+	border-width: 2px !important;
+	border-style: solid !important;
+	border-color: #ff2f2f70 !important;
+}
+
 @media (max-width: 576px) {
 	.chat-area {
 		width:100%;

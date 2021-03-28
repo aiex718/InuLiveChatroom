@@ -16,7 +16,7 @@ namespace InuLiveServer.Core
 {
     internal class WSChatServer:IChatServer
     {
-        static readonly string AnonymousUserName="吃瓜群眾";
+        static readonly string AnonymousUserName="一個吃瓜群眾";
 
         public event IChatServer.OnReceiveMsgEventHandler OnReceiveMsg;
         public event IChatServer.OnUserEventHandler OnUserJoin;
