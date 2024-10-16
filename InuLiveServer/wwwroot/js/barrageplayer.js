@@ -84,10 +84,9 @@ function StartPlayer()
 	var httpflvUrl = 'http://'+ document.location.hostname +':10501/live?port=1935&app=live&stream=inulive';
 	var hlsUrl = 'http://'+ document.location.hostname +':10501/inulive.m3u8';
 	
-	
 	if (flvjs.isSupported()) 
 	{
-		//PrintInfo("Player:flvjs");
+		PrintInfo("Player:flvjs");
 		var AutoPlayPromise;
 		
 		var flvPlayer = flvjs.createPlayer({

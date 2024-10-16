@@ -13,9 +13,9 @@ const Colors = ['coral', 'orange','khaki',
 'deepskyblue','mediumslateblue','mediumblue',
 'hotpink','darkslategray','chocolate'];
 
-var ConnUrl = "http://HOST:10500/chatHub";
+var ConnUrl = location.protocol + '//' + location.host + "/chatHub";
 var ChatHubConn = new signalR.HubConnectionBuilder()
-							.withUrl(ConnUrl.replace("HOST",window.location.host))
+							.withUrl(ConnUrl)
 							.withAutomaticReconnect()
 							.build();
 
@@ -33,11 +33,6 @@ nicknameinput.addEventListener("keydown", function(event)
 	}
 });
 
-window.addEventListener('StreamInfoReady', function (e) {
-	nicknameinput.disabled=false;
-	nicknameinput.placeholder="輸入暱稱";
-	chatjoinbtn.disabled=false;
-}, false);
 
 function OnJoinClick()
 {
@@ -179,6 +174,11 @@ async function ChatConnect()
 		PrintInfo("工讀生正在接線....");
         await ChatHubConn.start();
 		PrintInfo("線接好了(ง๑ •̀_•́)ง");
+
+		nicknameinput.disabled = false;
+		nicknameinput.placeholder = "輸入暱稱";
+		chatjoinbtn.disabled = false;
+
     } catch (err) {
 		PrintInfo("工讀生已罷工");
         console.log(err);

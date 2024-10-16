@@ -9,19 +9,20 @@
 	<!-- Font -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/earlyaccess/notosanstc.css">
 	<!-- Players -->
-	<link rel="stylesheet" href="./lib/videojs/video-js.css" >
+	<link rel="stylesheet" href="/lib/videojs/video-js.css" >
 	
 	<!--Styles-->
-	<link rel="stylesheet" href="./css/style.css">
-	<link rel="stylesheet" href="./css/icon.css">
-	<link rel="stylesheet" href="./css/player.css">
-	<link rel="stylesheet" href="./css/chat.css">
+	<link rel="stylesheet" href="/css/style.css">
+	<link rel="stylesheet" href="/css/icon.css">
+	<link rel="stylesheet" href="/css/player.css">
+	<link rel="stylesheet" href="/css/chat.css">
+
 	<!-- Meta Tag -->
-	<meta property="og:url"                content="http://inuyasha.pw/live/" />
+	<!--<meta property="og:url"                content="http://inuyasha.pw/live/" />-->
 	<meta property="og:type"               content="video.other" />
 	<meta property="og:title"              content="以努的狗窩" />
 	<meta property="og:description"        content="Inu Live Streaming" />
-	<meta property="og:image"              content="http://inuyasha.pw/live/res/poster/InuyashaPoster.jpg" />
+	<!--<meta property="og:image"              content="http://inuyasha.pw/live/res/poster/InuyashaPoster.jpg" />-->
   
 </head>
 
@@ -31,7 +32,7 @@
 			<div class="col-12 col-sm m-0 p-0">
 				<div class="d-flex flex-column h-100">
 					<div id="playercontainer" class="player-container"  >
-						<video id="videoBarrage" class="video-barrage" poster="./res/poster/InuyashaPoster.jpg" playsinline ></video>
+						<video id="videoBarrage" class="video-barrage" poster="./res/poster/InuyashaPoster.jpg" playsinline src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" ></video>
 						<div id="unmutenotify" class="unmute-notify w-100 h-100 justify-content-center"> 
 							<div id="unmutenotifytext" class="unmute-notify-text unselectable">按一下取消靜音</div>
 						</div>
@@ -105,21 +106,22 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 	
 	<!-- Barrage Player -->
-	<script src="./js/canvasbarrage.js"></script>
-	<script src="./js/barrageplayer.js"></script>
+	<script src="/js/canvasbarrage.js"></script>
+	<script src="/js/barrageplayer.js"></script>
 	
 	<!-- Chatroom -->
-	<script src="./lib/signalr-5.0.4/signalr.js"></script>
-	<script src="./js/chat.js"></script>
+	<script src="/lib/signalr/dist/browser/signalr.js"></script>
+	<script src="/js/chat.js"></script>
 	
 	<!-- StreamInfo -->
-	<script src="./js/streaminfo.js"></script>
+	<script src="/js/streaminfo.js"></script>
 	
 	<!-- Players -->
-	<script src="./lib/flvjs/flv.min.js"></script>
-	<script src="./lib/hlsjs/hls.js"></script>
-	<script src="./lib/videojs/video.min.js"></script>
+	<script src="/lib/flvjs/flv.min.js"></script>
+	<script src="/lib/hlsjs/hls.js"></script>
+	<script src="/lib/videojs/video.min.js"></script>
 	<script>
+
 		window.addEventListener('ReceiveChat', function (e) {
 			var payload = e.detail;
 			AddBarrage(payload.message,payload.color);//barrage			
@@ -128,16 +130,26 @@
 		window.addEventListener('StreamInfoQuerying', function (e) {
 			PrintInfo("正在連接至實況伺服器...");
 		}, false);
-		
+
+        //for Azure demo, use internal video play bunny video
 		window.addEventListener('StreamInfoReady', function (e) {
-			ChatConnect();
-			StartPlayer();		
+			//StartPlayer();
 		}, false);
+
+        window.addEventListener('StreamInfoEmpty', function (e) {
+            var videoBarrage = document.getElementById("videoBarrage");
+            videoBarrage.volume = 0;
+            videoBarrage.play();
+        }, false);
 		
 		window.addEventListener('StreamInfoFail', function (e) {			
 			PrintInfo("無法連接伺服器");
 		}, false);
-	
+
+        window.addEventListener('DOMContentLoaded', function (e) {
+            ChatConnect();
+        }, false);
+
 	</script>
   </body>
 </html>

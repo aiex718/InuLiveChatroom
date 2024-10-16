@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,13 +10,15 @@ using InuLiveServer.Models;
 namespace InuLiveServer.Controllers
 {
     [ApiController]
-    public class StreamInfoController : Controller
+    public class HelloController : Controller
     {
+
         [HttpGet]
-        [Route("api/streaminfo/")]
-        public ActionResult<StreamInfo> GetStreamInfo()
+        [Route("api/hello/")]
+        public ActionResult<string> GetHello()
         {
-            return Program.streamInfo;
+            return "Hello";
         }
+
     }
 }

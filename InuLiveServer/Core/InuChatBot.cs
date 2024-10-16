@@ -18,13 +18,6 @@ namespace InuLiveServer.Core
     {
         static readonly string HelpMsg="輸入 #語音內容 來說話，!who 查看線上使用者";
         IChatServer ChatServer;
-        GoogleTTSService TTSService;
-
-        public InuChatBot()
-        {
-            TTSService = new GoogleTTSService();
-            TTSService.StartSpeech();
-        }
 
         public void Attach(IChatServer chatServer)
         {
@@ -62,12 +55,7 @@ namespace InuLiveServer.Core
 
         async void OnReceiveMsg(object sender, ChatPayload payload)
         {
-            if (payload.message.StartsWith('#'))
-            {
-                TTSService.QueueText(payload.message.Replace("#",""));
-            }
-
-            else if (payload.message.StartsWith("!help"))
+            if (payload.message.StartsWith("!help"))
             {
                 var help = GenerateResponse(HelpMsg);
                 await ChatServer.SendPayloadAsync(help,payload.sender);
