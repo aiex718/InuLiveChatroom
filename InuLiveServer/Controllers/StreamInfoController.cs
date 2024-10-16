@@ -12,7 +12,12 @@ namespace InuLiveServer.Controllers
     [ApiController]
     public class StreamInfoController : Controller
     {
-        static StreamInfo _streamInfo { get; set; }
+        static StreamInfo _streamInfo { get; set; } = new StreamInfo()
+        {
+            title = "InuLiveDemo",
+            subtitle = "´ú¸Õ¼v¤ù",
+            game = "Big Buck Bunny",
+        };
 
         [HttpGet]
         [Route("api/streaminfo/")]
@@ -29,6 +34,9 @@ namespace InuLiveServer.Controllers
                 return false;
             else
             {
+                if(_streamInfo == null)
+                    _streamInfo=new StreamInfo();
+                
                 streamInfo.CopyTo(_streamInfo);
             }
             return true;
