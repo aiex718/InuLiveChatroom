@@ -60,14 +60,12 @@ namespace InuLiveServer.Core
                 var help = GenerateResponse(HelpMsg);
                 await ChatServer.SendPayloadAsync(help,payload.sender);
             }
-
             else if (payload.message.StartsWith("!who"))
             {
                 var users =  ChatServer.ListUser().ToList();
                 var who = GenerateResponse($"現在線上人數為{users.Count}人 ,已登入使用者:{users.Aggregate((i, j) => i + ',' + j)}");
                 await ChatServer.SendPayloadAsync(who,payload.sender);
             }
-            
             else if (payload.message.Contains("bot"))
             {
                 var response = GenerateResponse("汪 ∪･ω･∪");

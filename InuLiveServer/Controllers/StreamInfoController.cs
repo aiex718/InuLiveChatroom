@@ -12,41 +12,71 @@ namespace InuLiveServer.Controllers
     [ApiController]
     public class StreamInfoController : Controller
     {
-        static StreamInfo _streamInfo { get; set; } = new StreamInfo()
+        // static readonly StreamInfo DefaultStreamInfo = new StreamInfo()
+        // {
+        //     title = "以努的狗窩",
+        //     subtitle = "實況準備中",
+        //     game = null,
+        //     urls = null,
+        //     // new List<string>{
+        //     //     "http://192.168.88.10:8081/live/livestream.flv",
+	    //     //     "http://192.168.88.10:8081/live/livestream.m3u8"
+        //     // },
+        //     isLive = null
+        // };
+        static readonly StreamInfo DefaultStreamInfo = new StreamInfo()
         {
-            title = "InuLiveDemo",
-            subtitle = "���ռv��",
-            game = "Big Buck Bunny",
+            title = "以努的狗窩",
+            subtitle = "BigBuckBunny",
+            game = "Movie",
+            urls = new List<string>{
+                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            },
+            isLive = false
         };
+
+        static StreamInfo streamInfo { get; set; }  = DefaultStreamInfo;
 
         [HttpGet]
         [Route("api/streaminfo/")]
         public ActionResult<StreamInfo> GetStreamInfo()
         {
-            return _streamInfo;
+            return streamInfo;
+        }
+
+        [HttpGet]
+        [Route("api/streaminfo/set")]
+        public ActionResult<bool> SetStreamTitle([FromQuery]string title, [FromQuery]string subtitle, [FromQuery]string game)
+        {
+            var val=new StreamInfo();
+            val.title=title;
+            val.subtitle=subtitle;
+            val.game=game;
+            val.isLive=streamInfo?.isLive;
+            val.urls=streamInfo?.urls;
+            
+            streamInfo = val;
+            return true;
         }
 
         [HttpPost]
         [Route("api/streaminfo/")]
-        public ActionResult<bool> PostStreamInfo([FromBody] StreamInfo streamInfo)
+        public ActionResult<bool> PostStreamInfo([FromBody] StreamInfo val)
         {
-            if (streamInfo == null || streamInfo.IsValid() == false)
+            if (val == null || val.IsValid() == false)
                 return false;
             else
             {
-                if(_streamInfo == null)
-                    _streamInfo=new StreamInfo();
-                
-                streamInfo.CopyTo(_streamInfo);
+                streamInfo = val;
+                return true;
             }
-            return true;
         }
 
         [HttpDelete]
         [Route("api/streaminfo/")]
         public ActionResult<bool> DeleteStreamInfo()
         {
-            _streamInfo = null;
+            streamInfo = null;
             return true;
         }
 
