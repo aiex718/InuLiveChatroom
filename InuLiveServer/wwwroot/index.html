@@ -9,13 +9,13 @@
 	<!-- Font -->
 	<link rel="stylesheet" href="https://fonts.googleapis.com/earlyaccess/notosanstc.css">
 	<!-- Players -->
-	<link rel="stylesheet" href="/lib/videojs/video-js.css" >
+	<link rel="stylesheet" href="lib/videojs/video-js.css" >
 	
 	<!--Styles-->
-	<link rel="stylesheet" href="/css/style.css">
-	<link rel="stylesheet" href="/css/icon.css">
-	<link rel="stylesheet" href="/css/player.css">
-	<link rel="stylesheet" href="/css/chat.css">
+	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/icon.css">
+	<link rel="stylesheet" href="css/player.css">
+	<link rel="stylesheet" href="css/chat.css">
 
 	<!-- Meta Tag -->
 	<!--<meta property="og:url"                content="http://inuyasha.pw/live/" />-->
@@ -32,7 +32,7 @@
 			<div class="col-12 col-sm m-0 p-0">
 				<div class="d-flex flex-column h-100">
 					<div id="playercontainer" class="player-container"  >
-						<video id="videoBarrage" class="video-barrage" poster="./res/poster/InuyashaPoster.jpg" playsinline src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" ></video>
+						<video id="videoBarrage" class="video-barrage" poster="res/poster/InuyashaPoster.jpg" playsinline ></video>
 						<div id="unmutenotify" class="unmute-notify w-100 h-100 justify-content-center"> 
 							<div id="unmutenotifytext" class="unmute-notify-text unselectable">按一下取消靜音</div>
 						</div>
@@ -58,7 +58,7 @@
 					</div>
 					<div id="titlebar" class="w-100 title">
 						<div class="float-left title-avatar-container h-100">
-							<img class="title-avatar-img h-100 w-100" src="./res/img/avatar.jpg"></img>
+							<img class="title-avatar-img h-100 w-100" src="res/img/avatar.jpg"></img>
 						</div>
 						<div class="float-left d-flex flex-column justify-content-center title-text-container h-100 ">
 							<h4 id="stream_title" class="title-name">以努的狗窩</h4>
@@ -84,7 +84,7 @@
 				<div class="chat-input-height d-flex flex-row align-items-center"> 
 					<textarea id="chatinput" class="chat-input w-100" maxlength="200" placeholder="傳送訊息"></textarea>
 					<button id="sendchatbtn" class="chat-send-btn" onclick="OnChatSend()">
-					<img class="chat-send-btnimg" src="./res/icon/send.png" />					
+					<img class="chat-send-btnimg" src="res/icon/send.png" />					
 				</div>
 				
 				<div id="chatloginarea" class="chat-login-area flex-column align-items-center justify-content-center">
@@ -106,21 +106,27 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 	
 	<!-- Barrage Player -->
-	<script src="/js/canvasbarrage.js"></script>
-	<script src="/js/barrageplayer.js"></script>
+	<script src="js/videosync.js"></script>
+	<script src="js/canvasbarrage.js"></script>
+	<script src="js/barrageplayer.js"></script>
 	
 	<!-- Chatroom -->
-	<script src="/lib/signalr/dist/browser/signalr.js"></script>
-	<script src="/js/chat.js"></script>
+	<script src="lib/signalr/dist/browser/signalr.js"></script>
+	<script src="js/chat.js"></script>
 	
 	<!-- StreamInfo -->
-	<script src="/js/streaminfo.js"></script>
+	<script src="js/streaminfo.js"></script>
 	
 	<!-- Players -->
-	<script src="/lib/flvjs/flv.min.js"></script>
-	<script src="/lib/hlsjs/hls.js"></script>
-	<script src="/lib/videojs/video.min.js"></script>
+	<!-- <script src="lib/flvjs/flv.min.js"></script> -->
+	<script src="lib/mpegts/mpegts.js"></script>
+	<script src="lib/hlsjs/hls.js"></script>
+	<script src="lib/videojs/video.min.js"></script>
 	<script>
+
+		var streamInfo;
+		var video = document.getElementById("videoBarrage");
+		var isVideoCanPlayThrough = false;
 
 		window.addEventListener('ReceiveChat', function (e) {
 			var payload = e.detail;
@@ -131,15 +137,31 @@
 			PrintInfo("正在連接至實況伺服器...");
 		}, false);
 
-        //for Azure demo, use internal video play bunny video
 		window.addEventListener('StreamInfoReady', function (e) {
-			//StartPlayer();
+			streamInfo = e.detail;
+			var urls = streamInfo.urls;
+
+			var stream_title = $('#stream_title')[0];
+			var stream_subtitle = $('#stream_subtitle')[0];
+			var stream_game = $('#stream_game')[0];
+
+			stream_title.innerHTML = streamInfo.title;
+			stream_subtitle.innerHTML = streamInfo.subtitle;
+			stream_game.innerHTML = streamInfo.game;
+
+			for (var i = 0; i < urls.length; i++) 
+			{
+				if(StartPlayer(urls[i],streamInfo.isLive))
+					break;	
+			}
+
+			if(!streamInfo.isLive)
+				StartVideoSyncTimer();
+			
 		}, false);
 
         window.addEventListener('StreamInfoEmpty', function (e) {
-            var videoBarrage = document.getElementById("videoBarrage");
-            videoBarrage.volume = 0;
-            videoBarrage.play();
+			PrintInfo("目前沒有實況");
         }, false);
 		
 		window.addEventListener('StreamInfoFail', function (e) {			
@@ -149,6 +171,54 @@
         window.addEventListener('DOMContentLoaded', function (e) {
             ChatConnect();
         }, false);
+
+		window.addEventListener('SyncTimeReady', function (e) {
+
+			var video = document.getElementById("videoBarrage");
+			if(video.paused)
+				return;
+
+			var syncTime = e.detail;
+			syncTime = syncTime % video.duration;
+			//only sync if difference is larger than 1 seconds
+			if(Math.abs(video.currentTime - syncTime) > 1)
+			{
+				PrintInfo("已將您傳送到"+secondsToHMS(syncTime));
+				video.currentTime = syncTime;
+			}
+
+        }, false);
+
+		video.addEventListener("pause", (event) => {
+			console.log("pause");
+			if(!streamInfo.isLive)
+				GetSyncTime();
+		});
+
+		video.addEventListener("play", (event) => {
+			console.log("play");
+			if(!streamInfo.isLive)
+			{
+				if(isVideoCanPlayThrough)
+					GetSyncTime();
+				else
+				{
+					setTimeout(() => {
+						var playEvent = new Event('play');
+						videoBarrage.dispatchEvent(playEvent);
+					}, 1000);
+				}
+			}
+		});
+
+		video.addEventListener("canplaythrough", (event) => {
+			isVideoCanPlayThrough = true;
+		});
+
+		video.addEventListener("ended", (event) => {
+			if(!streamInfo.isLive)
+				StopVideoSyncTimer();
+		});
 
 	</script>
   </body>
