@@ -1,5 +1,5 @@
 
-
+var player;
 var playercontainer = document.getElementById("playercontainer");
 var playerchatarea = document.getElementById("playerchatarea");
 var titlebar = document.getElementById("titlebar");
@@ -21,8 +21,6 @@ var fullbtn = document.getElementById("fullbtn");
 var playbtn = document.getElementById("playbtn");
 var barragebtn = document.getElementById("barragebtn");
 
-var firstTimeAutoplay=false;
-
 var databarrage=[{value: ' ',time: 1, speed: 0}];
 
 var demoBarrage = new CanvasBarrage(canvasBarrage, videoBarrage, {
@@ -39,6 +37,17 @@ unmutenotify.addEventListener("click", function( event ) {
 	SetVolume(100);
 	RefreshPlayerIcon();
 }, false);
+
+unmutenotify.addEventListener("mouseenter", function( event ) {
+	unmutenotify.classList.remove("fadeout");
+	unmutenotify.classList.add("fadein");
+}, false);
+
+unmutenotify.addEventListener("mouseleave", function( event ) {
+	unmutenotify.classList.remove("fadein");
+	unmutenotify.classList.add("fadeout");
+}, false);
+
 
 controlpanel.addEventListener("mouseenter", function( event ) {
 	SetControlVisible(true);
@@ -79,66 +88,82 @@ window.addEventListener("resize", function() {
 	resetCanvasSize();
 });
 
-function StartPlayer()
+function StartPlayer(video_url,isLive)
 {
-	var httpflvUrl = 'http://'+ document.location.hostname +':10501/live?port=1935&app=live&stream=inulive';
-	var hlsUrl = 'http://'+ document.location.hostname +':10501/inulive.m3u8';
-	
-	if (flvjs.isSupported()) 
+	//var httpflvUrl = 'http://'+ document.location.hostname +':8081/live/livestream.flv';
+	//var hlsUrl = 'http://'+ document.location.hostname +':8081/live/livestream.m3u8';
+	//var httpflvUrl = 'http://192.168.88.10:8081/live/livestream.flv';
+	//var hlsUrl = 'http://192.168.88.10:8081/live/livestream.m3u8';
+	if(video_url.endsWith(".flv"))
 	{
-		PrintInfo("Player:flvjs");
-		var AutoPlayPromise;
+		if(!mpegts.isSupported())
+		{
+			console.warn('Mpegts is not supported');
+			return false;
+		}
+
+		PrintInfo("播放器:Mpegts");
 		
-		var flvPlayer = flvjs.createPlayer({
+		player = mpegts.createPlayer({
 			type: 'flv',
-			url: httpflvUrl
+			isLive: true,
+			url: video_url
 		});
-		flvPlayer.attachMediaElement(videoBarrage);
-		flvPlayer.load();
-		flvPlayer.play().catch(error => {
-			SetVolume(0);
-			flvPlayer.play().then(_ => {
-				unmutenotify.style.display='flex';
-			});
+
+		player.on(mpegts.Events.ERROR, (errorType, errorDetail, errorInfo) => {
+			console.error('MPEGTS.js Error:', errorType, errorDetail, errorInfo);
+	
+			// Handle different error types
+			if (errorType === mpegts.ErrorTypes.NETWORK_ERROR) 
+			{
+				console.warn('Network error occurred:', errorDetail);
+			} 
+			else if (errorType === mpegts.ErrorTypes.MEDIA_ERROR) 
+			{
+				console.warn('Media error occurred:', errorDetail);
+			} 
+			else if (errorType === mpegts.ErrorTypes.OTHER_ERROR) 
+			{
+				console.warn('Unknown error:', errorDetail);
+			}
 		});
+
+		player.attachMediaElement(videoBarrage);
+		player.load();
 	}
-	
-	
-	
-	// if(!PlayerFound) 
-	// {
-		// videoBarrage.classList.add("video-js");
-		// var player = videojs('videoBarrage');
-		
-		// if(player.canPlayType('application/x-mpegURL'))
-		// {
-			// PrintInfo("Player:video-js");
-			// PlayerFound=true;
-			
-			// player.play();
-		// }
-		// else
-		// {
-			// videoBarrage.classList.remove("video-js");
-		// }
-	// }
-	
-	else if(Hls.isSupported()) 
+	else if(video_url.endsWith(".m3u8")) 
 	{		
-		var hls = new Hls();
-		hls.loadSource(hlsUrl);
-		hls.attachMedia(videoBarrage);		
-		PrintInfo("工讀生說 你的瀏覽器延遲很高，換一個好嗎∠( ᐛ 」∠)＿");
+		if(!Hls.isSupported())
+		{
+			console.warn('HLS.js is not supported');
+			return false;
+		}
+		PrintInfo("播放器:HLS.js");
+
+		player = new Hls();
+		player.loadSource(video_url);
+		player.attachMedia(videoBarrage);
+
+		if(isLive)
+			PrintInfo("工讀生說 你的瀏覽器延遲很高，換一個好嗎∠( ᐛ 」∠)＿");
 	}	
-	else//Hls Native
+	else//use native video for other formats
 	{
-		var source = document.createElement('source');
-		source.setAttribute('src', hlsUrl);
-		videoBarrage.appendChild(source);
-		PrintInfo("工讀生說 你的瀏覽器延遲很高，換一個好嗎∠( ᐛ 」∠)＿");
+		PrintInfo("播放器:Native");
+		player = null;
+		videoBarrage.setAttribute("src", video_url);
+		
+		if(isLive)
+			PrintInfo("工讀生說 你的瀏覽器延遲真的很高，換一個好嗎∠( ᐛ 」∠)＿");
 	}
-	
+
+	unmutenotify.classList.add("fade-in-out");
+
+	videoBarrage.volume=0;
+	videoBarrage.play();
+
 	RefreshPlayerIcon();
+	return true;
 }
 
 function AddBarrage(Text,Color)

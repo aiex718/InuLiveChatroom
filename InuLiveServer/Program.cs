@@ -8,7 +8,7 @@ namespace InuLiveServer
 {
     public class Program
     {
-
+        internal static readonly DateTime startTime = DateTime.Now;
         internal static readonly InuChatBot chatbot = new InuChatBot();
         //internal static WSChatServer wsChatServer = new WSChatServer();
         internal static readonly SignalRChatServer chatServer = new SignalRChatServer();
