@@ -9,18 +9,16 @@ namespace InuLiveServer
     public class Program
     {
         internal static readonly DateTime startTime = DateTime.Now;
-        internal static readonly InuChatBot chatbot = new InuChatBot();
         //internal static WSChatServer wsChatServer = new WSChatServer();
-        internal static readonly SignalRChatServer chatServer = new SignalRChatServer();
-
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
             builder.Services.AddControllers();
             builder.Services.AddSignalR();
+            builder.Services.AddSingleton<IChatServer,SignalRChatServer>();
+            builder.Services.AddHostedService<InuChatBot>();
 
             var app = builder.Build();
 
@@ -31,11 +29,7 @@ namespace InuLiveServer
             app.UseAuthorization();
             app.MapControllers();
 
-            app.MapHub<ChatHub>("/chatHub");
-
-            var hubContext = app.Services.GetService(typeof(IHubContext<ChatHub>));
-            chatServer.ConnectToHub(hubContext as IHubContext<ChatHub>);
-            chatbot.Attach(chatServer);
+            app.MapHub<ChatHub>($"/{nameof(ChatHub)}");
 
             app.Run();
         }

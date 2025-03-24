@@ -13,96 +13,92 @@ namespace InuLiveServer.Core
 {
     public class SignalRChatServer:IChatServer
     {
-        static readonly String DefaultUserName="AnonymousUser";
+        static readonly String DefaultUserName="一位吃瓜群眾";
 
         ConcurrentDictionary<string,string> Cid_Username_Dict;
-        IHubContext<ChatHub> _hubContext;
+        readonly IHubContext<ChatHub> hubContext;
 
-        public event OnReceiveMsgEventHandler OnReceiveMsg;
+        public event OnReceiveChatPayloadEventHandler OnReceiveChatPayload;
         public event OnUserEventHandler OnUserJoin;
         public event OnUserEventHandler OnUserLeave;
 
-        public SignalRChatServer()
+        public SignalRChatServer(IHubContext<ChatHub> hub)
         {
             Cid_Username_Dict = new ConcurrentDictionary<string, string>();
+            hubContext=hub;
         }
 
-        public void ConnectToHub(IHubContext<ChatHub> hubContext)
+        public async Task ReceiveClientChatPayloadAsync(string cid, ChatPayload payload)
         {
-            _hubContext=hubContext;
-        }
-
-        public async Task OnSendMessage(HubCallerContext context,string user, string message)
-        {
-            var payload = JsonSerializer.Deserialize<ChatPayload>(message);
             if (payload!=null&& payload.IsValid())
             {
                 if(payload.payloadType==PayloadType.Login)
                 {
-                    var userName = payload.sender;
-                    var cid = context.ConnectionId;
-
+                    var userName = payload.nickname;
                     if(Cid_Username_Dict.TryUpdate(cid,userName,DefaultUserName))
                     {
-                        OnUserJoin?.Invoke(this,userName);
+                        OnUserJoin?.Invoke(this,cid);
                         Console.WriteLine($"{userName} login cid:{cid}");
                     }
                 }
-
-                if(payload.payloadType==PayloadType.Msg)
+                else if(payload.payloadType==PayloadType.Msg)
                 {
-                    await _hubContext.Clients.All.SendAsync("ReceiveMessage", user, message);                
-                    Console.WriteLine($"{user} say :{message}");
+                    var userName = GetUserName(cid);
+                    await SendChatPayloadToAllAsync(payload);             
+                    Console.WriteLine($"{payload.nickname} say :{payload.message}");
                 }
-                OnReceiveMsg?.Invoke(this,payload);
+                else if(payload.payloadType==PayloadType.Cmd)
+                {
+                    var userName = GetUserName(cid);
+                    await SendChatPayloadToClientAsync(cid,payload);             
+                    Console.WriteLine($"{payload.nickname} send command :{payload.message}");
+                }
+
+                OnReceiveChatPayload?.Invoke(this,cid,payload);
             }
         }
 
-        public async Task OnConnectedAsync(HubCallerContext context)
+        public async Task UserConnectedAsync(string cid)
         {
-            var cid = context.ConnectionId;
             if(String.IsNullOrEmpty(cid)==false)            
             {
-                Cid_Username_Dict.TryAdd(context.ConnectionId,DefaultUserName);                
+                Cid_Username_Dict.TryAdd(cid,DefaultUserName);                
                 Console.WriteLine($"{DefaultUserName} connected cid:{cid}");
             }
    
         }
 
-        public async Task OnDisconnectedAsync(HubCallerContext context, Exception ex)
+        public async Task UserDisconnectedAsync(string cid)
         {
-            var cid = context.ConnectionId;
             if(String.IsNullOrEmpty(cid)==false && Cid_Username_Dict.Keys.Contains(cid))            
             {
-                Cid_Username_Dict.TryRemove(context.ConnectionId,out var userName);
+                OnUserLeave?.Invoke(this,cid);
+                Cid_Username_Dict.TryRemove(cid,out var userName);
                 Console.WriteLine($"{userName} leave cid:{cid}");
-                OnUserLeave?.Invoke(this,userName);    
             }        
         }
-        
 
-        public async Task SendPayloadAsync(ChatPayload payload, string username = null)
+        public async Task SendChatPayloadToClientAsync(string cid, ChatPayload payload)
         {
-            var message = JsonSerializer.Serialize(payload);
-            IEnumerable<string> cids;
+            if (String.IsNullOrEmpty(cid)==false)
+                await hubContext.Clients.Client(cid).SendAsync("ServerSendChatPayload", payload);
+        }
 
-            if (String.IsNullOrEmpty(username)==false)
-            {
-                cids = Cid_Username_Dict.Where(kvp=>kvp.Value==username).Select(kvp=>kvp.Key).ToList();
-                foreach(var cid in cids)
-                {
-                    await _hubContext.Clients.Client(cid).SendAsync("ReceiveMessage", payload.sender, message);
-                }
-            }
-            else
-            {
-                await _hubContext.Clients.All.SendAsync("ReceiveMessage", payload.sender, message);
-            }
+        public async Task SendChatPayloadToAllAsync(ChatPayload payload)
+        {
+            await hubContext.Clients.All.SendAsync("ServerSendChatPayload", payload);
         }
 
         public IEnumerable<string> ListUser()
         {
             return Cid_Username_Dict.Values;
+        }
+
+        public string GetUserName(string cid)
+        {
+            string userName=null;
+            Cid_Username_Dict.TryGetValue(cid,out userName);
+            return userName;
         }
     }
 }

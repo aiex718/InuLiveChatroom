@@ -106,7 +106,7 @@
 	
 	<!-- Chatroom -->
 	<script src="lib/signalr/dist/browser/signalr.js"></script>
-	<script src="js/chat.js"></script>
+	<script src="js/chathub.js"></script>
 	
 	<!-- StreamInfo -->
 	<script src="js/streaminfo.js"></script>
@@ -184,13 +184,13 @@
         }, false);
 
 		video.addEventListener("pause", (event) => {
-			console.log("pause");
+			//console.log("pause");
 			if(!streamInfo.isLive)
 				GetSyncTime();
 		});
 
 		video.addEventListener("play", (event) => {
-			console.log("play");
+			//console.log("play");
 			if(!streamInfo.isLive)
 			{
 				if(isVideoCanPlayThrough)

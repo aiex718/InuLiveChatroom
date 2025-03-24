@@ -13,7 +13,7 @@ const Colors = ['coral', 'orange','khaki',
 'deepskyblue','mediumslateblue','mediumblue',
 'hotpink','darkslategray','chocolate'];
 
-var ConnUrl = location.protocol + '//' + location.host + "/chatHub";
+var ConnUrl = location.protocol + '//' + location.host + "/ChatHub";
 var ChatHubConn = new signalR.HubConnectionBuilder()
 							.withUrl(ConnUrl)
 							.withAutomaticReconnect()
@@ -91,12 +91,17 @@ function CreatePayload(msg,t)
 	var payload={
 		color:Color,
 		message:msg,
-		sender:NickName,
-		type:"Msg"
+		nickname:NickName,
+		type:null,
 	};
 	
 	if(t)
 		payload.type=t;
+	else if(msg.startsWith("/"))
+		payload.type="Cmd";
+	else
+		payload.type="Msg";
+
 	
 	return payload;
 }
@@ -111,7 +116,7 @@ function PrintMessage(payload)
 	
 	var senderSpan = document.createElement('span');
 	senderSpan.style.color=payload.color;
-	senderSpan.innerHTML = payload.sender;
+	senderSpan.innerHTML = payload.nickname;
 	
 	var colonSpan = document.createElement('span');
 	colonSpan.innerHTML = "：";
@@ -159,7 +164,7 @@ function ChatSendPayload(payload)
 {
 	if (ChatHubConn && ChatHubConn.state==signalR.HubConnectionState.Connected) 
 	{
-		ChatHubConn.invoke("SendMessage", NickName, JSON.stringify(payload))
+		ChatHubConn.invoke("ClientSendChatPayload",payload)
 		.catch(function (err) {
 			return console.error(err.toString());
 		});
@@ -202,8 +207,9 @@ ChatHubConn.onreconnected(function(){
 		ChatSendPayload(CreatePayload("HandShake","Login"));	
 });
 
-ChatHubConn.on("ReceiveMessage", function (user, message) {
-	PrintMessage(JSON.parse(message));
+//called by server
+ChatHubConn.on("ServerSendChatPayload", function (payload) {
+	PrintMessage(payload);
 });
 
 
