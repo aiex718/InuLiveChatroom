@@ -59,6 +59,14 @@ namespace InuLiveServer.Controllers
             return true;
         }
 
+        [HttpGet]
+        [Route("api/streaminfo/set/default")]
+        public ActionResult<bool> SetStreamToDefault()
+        {
+            streamInfo = DefaultStreamInfo;
+            return true;
+        }
+
         [HttpPost]
         [Route("api/streaminfo/")]
         public ActionResult<bool> PostStreamInfo([FromBody] StreamInfo val)

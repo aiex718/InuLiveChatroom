@@ -1,3 +1,9 @@
+const LiveLinkEvents = {
+	'ServerSendChatPayload':'ServerSendChatPayload',
+	'ServerSendControlPayload':'ServerSendControlPayload',
+};
+
+
 var chatloginarea = document.getElementById("chatloginarea");
 var nicknameinput = document.getElementById("nicknameinput");
 var chatjoinbtn = document.getElementById("chatjoinbtn");
@@ -13,8 +19,8 @@ const Colors = ['coral', 'orange','khaki',
 'deepskyblue','mediumslateblue','mediumblue',
 'hotpink','darkslategray','chocolate'];
 
-var ConnUrl = location.protocol + '//' + location.host + "/chatHub";
-var ChatHubConn = new signalR.HubConnectionBuilder()
+var ConnUrl = location.protocol + '//' + location.host + "/LiveLinkHub";
+var HubConn = new signalR.HubConnectionBuilder()
 							.withUrl(ConnUrl)
 							.withAutomaticReconnect()
 							.build();
@@ -74,7 +80,9 @@ function ChatScrollToButtom()
 function OnChatSend()
 {
 	SendChat(chatinput.value);
-	chatinput.value="";
+	setTimeout(() => {
+		chatinput.value="";
+	}, 50);
 }
 
 
@@ -91,12 +99,17 @@ function CreatePayload(msg,t)
 	var payload={
 		color:Color,
 		message:msg,
-		sender:NickName,
-		type:"Msg"
+		nickname:NickName,
+		type:null,
 	};
 	
 	if(t)
 		payload.type=t;
+	else if(msg.startsWith("/"))
+		payload.type="Cmd";
+	else
+		payload.type="Msg";
+
 	
 	return payload;
 }
@@ -111,22 +124,29 @@ function PrintMessage(payload)
 	
 	var senderSpan = document.createElement('span');
 	senderSpan.style.color=payload.color;
-	senderSpan.innerHTML = payload.sender;
+	senderSpan.innerHTML = payload.nickname;
 	
 	var colonSpan = document.createElement('span');
 	colonSpan.innerHTML = "：";
-	
-	var msgSpan = document.createElement('span');
-	msgSpan.innerHTML = payload.message;
-	
+
 	chatDiv.appendChild(senderSpan);
 	chatDiv.appendChild(colonSpan);
-	chatDiv.appendChild(msgSpan);
-	
+
+	payload.message.split("\n").forEach(function(line)
+	{
+		if(line)
+		{
+			var msgSpan = document.createElement('span');
+			msgSpan.innerHTML = line;
+			chatDiv.appendChild(msgSpan);
+			chatDiv.appendChild(document.createElement('br'));
+		}
+	});
+
 	chatmessages.appendChild(chatDiv);
 	ChatScrollToButtom();
 	
-	if(payload.type.toLowerCase().includes("msg"))
+	if(payload.type=="Msg")
 	{
 		var evt = new CustomEvent(ChatEvents['ReceiveChat'], {'detail': payload});
 		window.dispatchEvent(evt);
@@ -149,17 +169,17 @@ function PrintInfo(infotext)
 
 function ChatClose() 
 {
-	if (ChatHubConn) 
+	if (HubConn) 
 	{
-		ChatHubConn.stop();
+		HubConn.stop();
 	}
 };
 
 function ChatSendPayload(payload) 
 {
-	if (ChatHubConn && ChatHubConn.state==signalR.HubConnectionState.Connected) 
+	if (HubConn && HubConn.state==signalR.HubConnectionState.Connected) 
 	{
-		ChatHubConn.invoke("SendMessage", NickName, JSON.stringify(payload))
+		HubConn.invoke("ClientSendChatPayload",payload)
 		.catch(function (err) {
 			return console.error(err.toString());
 		});
@@ -172,7 +192,7 @@ async function ChatConnect()
 {
 	try {
 		PrintInfo("工讀生正在接線....");
-        await ChatHubConn.start();
+        await HubConn.start();
 		PrintInfo("線接好了(ง๑ •̀_•́)ง");
 
 		nicknameinput.disabled = false;
@@ -185,25 +205,34 @@ async function ChatConnect()
     }
 };
 
+function GetSyncTime()
+{
+	var payload = CreatePayload("/sync");
+	ChatSendPayload(payload);
+}
+
+function secondsToHMS(seconds) {
+    let h = Math.floor(seconds / 3600);
+    let m = Math.floor((seconds % 3600) / 60);
+    let s = Math.floor(seconds % 60);
+
+    return [h, m, s].map(unit => String(unit).padStart(2, '0')).join(':');
+}
+
 "use strict";
 
-ChatHubConn.onclose(function(){
+HubConn.onclose(function(){
 	PrintInfo("已離開聊天室");
 });
 
-ChatHubConn.onreconnecting(function(){
+HubConn.onreconnecting(function(){
 	PrintInfo("踢到線了....");
 	PrintInfo("工讀生正在接線....");
 });
 
-ChatHubConn.onreconnected(function(){
+HubConn.onreconnected(function(){
 	PrintInfo("線接好了(ง๑ •̀_•́)ง");
 	if(NickName)
-		ChatSendPayload(CreatePayload("HandShake","Login"));	
+		ChatSendPayload(CreatePayload("HandShake","Login"));
 });
-
-ChatHubConn.on("ReceiveMessage", function (user, message) {
-	PrintMessage(JSON.parse(message));
-});
-
 

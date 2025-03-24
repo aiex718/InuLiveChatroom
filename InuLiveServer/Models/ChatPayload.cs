@@ -15,7 +15,7 @@ namespace InuLiveServer.Models
 
     public class ChatPayload
     {
-        public string sender {get;set;}
+        public string nickname {get;set;}
         public string message {get;set;}
         public string color {get;set;}   
         public string type 
@@ -24,21 +24,19 @@ namespace InuLiveServer.Models
             set=> payloadType = (PayloadType)Enum.Parse(typeof(PayloadType),value);
         }   
 
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public PayloadType payloadType {get;set;}
 
         public void Print()
         {
-            Console.WriteLine($"Receive ChatPayload from {sender}");
+            Console.WriteLine($"Receive ChatPayload from {nickname}");
             Console.WriteLine($"Message:{message}");
             Console.WriteLine($"Type:{type},Color:{color}");
         }
 
         public bool IsValid()
         {
-            return String.IsNullOrEmpty(sender)==false &&
-            String.IsNullOrEmpty(message)==false &&
-            String.IsNullOrEmpty(color)==false ;
+            return String.IsNullOrEmpty(message)==false;
         }
     }
 }

@@ -6,13 +6,22 @@ namespace InuLiveServer.Core
 {
     public interface IChatServer
     {
-        delegate void OnReceiveMsgEventHandler(object sender, ChatPayload payload);
-        event OnReceiveMsgEventHandler OnReceiveMsg;
 
-        delegate void OnUserEventHandler(object sender, string username);
+        Task ReceiveClientChatPayloadAsync(string cid,ChatPayload payload);
+        Task UserConnectedAsync(string cid);
+        Task UserDisconnectedAsync(string cid);
+        Task SendChatPayloadToClientAsync(string cid,ChatPayload payload);
+        Task SendChatPayloadToAllAsync(ChatPayload payload);
+
+
+        delegate void OnReceiveChatPayloadEventHandler(object sender, string cid, ChatPayload payload);
+        event OnReceiveChatPayloadEventHandler OnReceiveChatPayload;
+
+        delegate void OnUserEventHandler(object sender, string cid);
         event OnUserEventHandler OnUserJoin;
         event OnUserEventHandler OnUserLeave;
-        Task SendPayloadAsync(ChatPayload payload,string username=null);
+
         IEnumerable<string> ListUser();
+        string GetUserName(string cid);
     } 
 }

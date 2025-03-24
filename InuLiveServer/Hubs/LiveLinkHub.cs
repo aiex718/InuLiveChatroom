@@ -11,23 +11,30 @@ using System.Text.Json;
 
 namespace InuLiveServer.Hubs
 {
-    public class ChatHub : Hub
+    public class LiveLinkHub : Hub
     {
-        
-        public async Task SendMessage(string user, string message)
+        private readonly IChatServer chatServer;
+
+        public LiveLinkHub(IChatServer chat)
         {
-            await Program.chatServer.OnSendMessage(Context,user,message);
+            chatServer = chat;
+        }
+
+        //called by client
+        public async Task ClientSendChatPayload(ChatPayload payload)
+        {
+            await chatServer.ReceiveClientChatPayloadAsync(Context.ConnectionId,payload);
         }
 
         public override async Task OnConnectedAsync()        
         {
-            await Program.chatServer.OnConnectedAsync(Context);
+            await chatServer.UserConnectedAsync(Context.ConnectionId);
             await base.OnConnectedAsync();     
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            await Program.chatServer.OnDisconnectedAsync(Context, exception);
+            await chatServer.UserDisconnectedAsync(Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
         
