@@ -100,13 +100,12 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
 	
 	<!-- Barrage Player -->
-	<script src="js/videosync.js"></script>
 	<script src="js/canvasbarrage.js"></script>
 	<script src="js/barrageplayer.js"></script>
 	
-	<!-- Chatroom -->
+	<!-- LiveLink -->
 	<script src="lib/signalr/dist/browser/signalr.js"></script>
-	<script src="js/chathub.js"></script>
+	<script src="js/livelink.js"></script>
 	
 	<!-- StreamInfo -->
 	<script src="js/streaminfo.js"></script>
@@ -148,10 +147,6 @@
 				if(StartPlayer(urls[i],streamInfo.isLive))
 					break;	
 			}
-
-			if(!streamInfo.isLive)
-				StartVideoSyncTimer();
-			
 		}, false);
 
         window.addEventListener('StreamInfoEmpty', function (e) {
@@ -166,29 +161,7 @@
             ChatConnect();
         }, false);
 
-		window.addEventListener('SyncTimeReady', function (e) {
-
-			var video = document.getElementById("videoBarrage");
-			if(video.paused)
-				return;
-
-			var syncTime = e.detail;
-			syncTime = syncTime % video.duration;
-			//only sync if difference is larger than 1 seconds
-			if(Math.abs(video.currentTime - syncTime) > 1)
-			{
-				PrintInfo("已將您傳送到"+secondsToHMS(syncTime));
-				video.currentTime = syncTime;
-			}
-
-        }, false);
-
-		video.addEventListener("pause", (event) => {
-			//console.log("pause");
-			if(!streamInfo.isLive)
-				GetSyncTime();
-		});
-
+		//Video Events
 		video.addEventListener("play", (event) => {
 			//console.log("play");
 			if(!streamInfo.isLive)
@@ -197,6 +170,8 @@
 					GetSyncTime();
 				else
 				{
+					//try to wait for video loaded
+					//then dispatch this event again
 					setTimeout(() => {
 						var playEvent = new Event('play');
 						videoBarrage.dispatchEvent(playEvent);
@@ -209,9 +184,29 @@
 			isVideoCanPlayThrough = true;
 		});
 
-		video.addEventListener("ended", (event) => {
+		//LiveLink Events(called by server)
+		HubConn.on("ServerSendChatPayload", function (payload) {
+			PrintMessage(payload);
+		});
+
+		HubConn.on("ServerSendVideoCtrlPayload", function (payload) {
 			if(!streamInfo.isLive)
-				StopVideoSyncTimer();
+			{
+				var video = document.getElementById("videoBarrage");
+				syncTime = payload.currentTime % video.duration;
+				
+				//only sync if difference is larger than 1 seconds
+				if(Math.abs(video.currentTime - syncTime) > 1)
+				{
+					PrintInfo("已將您傳送到"+secondsToHMS(syncTime));
+					video.currentTime = syncTime;
+				}
+			}
+
+			if(payload.paused)
+				video.pause();
+			else
+				video.play();
 		});
 
 	</script>

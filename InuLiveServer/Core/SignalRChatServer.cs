@@ -16,13 +16,13 @@ namespace InuLiveServer.Core
         static readonly String DefaultUserName="一位吃瓜群眾";
 
         ConcurrentDictionary<string,string> Cid_Username_Dict;
-        readonly IHubContext<ChatHub> hubContext;
+        readonly IHubContext<LiveLinkHub> hubContext;
 
         public event OnReceiveChatPayloadEventHandler OnReceiveChatPayload;
         public event OnUserEventHandler OnUserJoin;
         public event OnUserEventHandler OnUserLeave;
 
-        public SignalRChatServer(IHubContext<ChatHub> hub)
+        public SignalRChatServer(IHubContext<LiveLinkHub> hub)
         {
             Cid_Username_Dict = new ConcurrentDictionary<string, string>();
             hubContext=hub;
@@ -35,7 +35,8 @@ namespace InuLiveServer.Core
                 if(payload.payloadType==PayloadType.Login)
                 {
                     var userName = payload.nickname;
-                    if(Cid_Username_Dict.TryUpdate(cid,userName,DefaultUserName))
+                    if(string.IsNullOrEmpty(userName)==false && 
+                        Cid_Username_Dict.TryUpdate(cid,userName,DefaultUserName))
                     {
                         OnUserJoin?.Invoke(this,cid);
                         Console.WriteLine($"{userName} login cid:{cid}");
@@ -50,7 +51,8 @@ namespace InuLiveServer.Core
                 else if(payload.payloadType==PayloadType.Cmd)
                 {
                     var userName = GetUserName(cid);
-                    await SendChatPayloadToClientAsync(cid,payload);             
+                    //let chat bot will handle this 
+                    //await SendChatPayloadToClientAsync(cid,payload);       
                     Console.WriteLine($"{payload.nickname} send command :{payload.message}");
                 }
 

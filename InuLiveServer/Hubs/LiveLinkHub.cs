@@ -11,11 +11,11 @@ using System.Text.Json;
 
 namespace InuLiveServer.Hubs
 {
-    public class ChatHub : Hub
+    public class LiveLinkHub : Hub
     {
         private readonly IChatServer chatServer;
 
-        public ChatHub(IChatServer chat)
+        public LiveLinkHub(IChatServer chat)
         {
             chatServer = chat;
         }

@@ -24,7 +24,7 @@ namespace InuLiveServer.Models
             set=> payloadType = (PayloadType)Enum.Parse(typeof(PayloadType),value);
         }   
 
-        [JsonIgnoreAttribute]
+        [JsonIgnore]
         public PayloadType payloadType {get;set;}
 
         public void Print()
@@ -36,9 +36,7 @@ namespace InuLiveServer.Models
 
         public bool IsValid()
         {
-            return String.IsNullOrEmpty(nickname)==false &&
-            String.IsNullOrEmpty(message)==false &&
-            String.IsNullOrEmpty(color)==false ;
+            return String.IsNullOrEmpty(message)==false;
         }
     }
 }

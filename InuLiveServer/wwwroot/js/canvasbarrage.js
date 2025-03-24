@@ -12,7 +12,7 @@ var CanvasBarrage = function (canvas, video, options) {
 	var defaults = {
 		opacity: 100,
 		fontSize: 24,
-		speed: 2,
+		speed: 1.3,
 		range: [0,0.3],
 		color: 'white',
 		data: []

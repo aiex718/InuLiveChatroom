@@ -8,8 +8,6 @@ namespace InuLiveServer
 {
     public class Program
     {
-        internal static readonly DateTime startTime = DateTime.Now;
-        //internal static WSChatServer wsChatServer = new WSChatServer();
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +15,9 @@ namespace InuLiveServer
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddSignalR();
+            //builder.Services.AddSingleton<IChatServer,WSChatServer>();
             builder.Services.AddSingleton<IChatServer,SignalRChatServer>();
+            builder.Services.AddSingleton<IVideoSyncServer,SignalRSyncServer>();
             builder.Services.AddHostedService<InuChatBot>();
 
             var app = builder.Build();
@@ -29,7 +29,7 @@ namespace InuLiveServer
             app.UseAuthorization();
             app.MapControllers();
 
-            app.MapHub<ChatHub>($"/{nameof(ChatHub)}");
+            app.MapHub<LiveLinkHub>($"/{nameof(LiveLinkHub)}");
 
             app.Run();
         }
