@@ -51,8 +51,7 @@ namespace InuLiveServer.Core
                 else if(payload.payloadType==PayloadType.Cmd)
                 {
                     var userName = GetUserName(cid);
-                    //let chat bot will handle this 
-                    //await SendChatPayloadToClientAsync(cid,payload);       
+                    await SendChatPayloadToClientAsync(cid,payload);       
                     Console.WriteLine($"{payload.nickname} send command :{payload.message}");
                 }
 
