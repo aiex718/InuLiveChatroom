@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Info API</title>
+</head>
+<body>
+    <h1>Stream Info</h1>
+    <button onclick="getStreamInfo()">Get Stream Info</button>
+    <button onclick="setDefaultStreamInfo()">Reset to Default</button>
+    <button onclick="deleteStreamInfo()">Delete Stream Info</button>
+    <br><br>
+    <label>Title: <input type="text" id="title"></label><br>
+    <label>Subtitle: <input type="text" id="subtitle"></label><br>
+    <label>Game: <input type="text" id="game"></label><br>
+    <label>Is Live: <input type="checkbox" id="isLive"></label><br>
+    <label>URLs:</label><br>
+    <textarea id="urls" rows="5" cols="50"></textarea><br>
+    <button onclick="setStreamInfo()">Set Stream Info</button>
+    <br><br>
+    <pre id="result"></pre>
+    
+    <script>
+        const apiBase = location.protocol + '//' + location.host +"/api/streaminfo";
+
+        function getStreamInfo() {
+            fetch(apiBase + "/")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+                    document.getElementById("title").value = data.title || "";
+                    document.getElementById("subtitle").value = data.subtitle || "";
+                    document.getElementById("game").value = data.game || "";
+                    document.getElementById("isLive").checked = data.isLive || false;
+                    document.getElementById("urls").value = data.urls ? data.urls.join("\n") : "";
+                })
+                .catch(error => alert(error));
+        }
+
+        function setStreamInfo() {
+            const title = document.getElementById("title").value;
+            const subtitle = document.getElementById("subtitle").value;
+            const game = document.getElementById("game").value;
+            const isLive = document.getElementById("isLive").checked;
+            const urls = document.getElementById("urls").value.split("\n").map(url => url.trim()).filter(url => url);
+            
+            fetch(apiBase + "/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ title, subtitle, game, isLive, urls })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data) alert("Stream Info Updated Successfully");
+                getStreamInfo();
+            })
+            .catch(error => alert(error));
+        }
+
+        function setDefaultStreamInfo() {
+            fetch(apiBase + "/set/default")
+                .then(response => response.json())
+                .then(data => {
+                    if (data) alert("Stream Info Reset to Default");
+                    getStreamInfo();
+                })
+                .catch(error => alert('Error:', error));
+        }
+
+        function deleteStreamInfo() {
+            fetch(apiBase + "/", {
+                method: "DELETE"
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data) alert("Stream Info Deleted Successfully");
+                    getStreamInfo();
+                })
+                .catch(error => alert('Error:', error));
+        }
+
+        document.addEventListener("DOMContentLoaded", (event) => {
+            getStreamInfo();
+        });
+    </script>
+</body>
+</html>

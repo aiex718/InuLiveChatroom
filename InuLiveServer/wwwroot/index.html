@@ -190,9 +190,10 @@
 		});
 
 		HubConn.on("ServerSendVideoCtrlPayload", function (payload) {
+			var video = document.getElementById("videoBarrage");
+			
 			if(!streamInfo.isLive)
 			{
-				var video = document.getElementById("videoBarrage");
 				syncTime = payload.currentTime % video.duration;
 				
 				//only sync if difference is larger than 1 seconds
