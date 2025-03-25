@@ -34,6 +34,7 @@ $(document).ready(function() {
 
 unmutenotify.addEventListener("click", function( event ) {
 	unmutenotify.style.display='none';
+	video.play();
 	SetVolume(100);
 	RefreshPlayerIcon();
 }, false);
@@ -96,6 +97,8 @@ function StartPlayer(video_url,isLive)
 	//var hlsUrl = 'http://'+ document.location.hostname +':8081/live/livestream.m3u8';
 	//var httpflvUrl = 'http://192.168.88.10:8081/live/livestream.flv';
 	//var hlsUrl = 'http://192.168.88.10:8081/live/livestream.m3u8';
+
+	SetVolume(0);
 
 	if(video_url.endsWith(".flv"))
 	{
@@ -162,7 +165,6 @@ function StartPlayer(video_url,isLive)
 
 	unmutenotify.classList.add("fade-in-out");
 
-	videoBarrage.volume=0;
 	videoBarrage.play();
 
 	RefreshPlayerIcon();
