@@ -21,27 +21,25 @@ namespace InuLiveServer.Controllers
 
         // static readonly StreamInfo DefaultStreamInfo = null;
 
-        // static readonly StreamInfo DefaultStreamInfo = new StreamInfo()
-        // {
-        //     title = "以努的狗窩",
-        //     subtitle = "實況準備中",
-        //     game = null,
-        //     urls = new List<string>{
-        //         "http://inuuu.duckdns.org:8081/live/livestream.flv",
-	    //         "http://inuuu.duckdns.org:8081/live/livestream.m3u8"
-        //     },
-        //     isLive = null
-        // };
         static readonly StreamInfo DefaultStreamInfo = new StreamInfo()
         {
             title = "以努的狗窩",
-            subtitle = "BigBuckBunny",
-            game = "Movie",
-            urls = new List<string>{
-                "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-            },
-            isLive = false
+            subtitle = "實況準備中",
+            game = null,
+            urls = null,
+            isLive = true
         };
+        
+        // static readonly StreamInfo DefaultStreamInfo = new StreamInfo()
+        // {
+        //     title = "以努的狗窩",
+        //     subtitle = "BigBuckBunny",
+        //     game = "Movie",
+        //     urls = new List<string>{
+        //         "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        //     },
+        //     isLive = false
+        // };
 
         static StreamInfo streamInfo { get; set; }  = DefaultStreamInfo;
 
