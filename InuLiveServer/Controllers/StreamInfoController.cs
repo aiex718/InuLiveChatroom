@@ -16,8 +16,8 @@ namespace InuLiveServer.Controllers
         // http://192.168.88.10:1985/rtc/v1/whip/?app=live&stream=livestream
         // rtmp://192.168.88.10/live/livestream
         // pull
-        // http://inuuu.duckdns.org:8081/live/livestream.flv
-        // http://inuuu.duckdns.org:8081/live/livestream.m3u8
+        // http://inuuu.duckdns.org:8080/live/livestream.flv
+        // http://inuuu.duckdns.org:8080/live/livestream.m3u8
 
         // static readonly StreamInfo DefaultStreamInfo = null;
 

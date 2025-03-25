@@ -279,6 +279,11 @@ function resetCanvasSize()
 function SetVolume(val)
 {
 	videoBarrage.volume = parseInt(val) / 100;
+	if(val==0)
+		video.muted=true;
+	else
+		video.muted=false;
+	
 	RefreshPlayerIcon();
 }
 
@@ -309,7 +314,7 @@ function RefreshPlayerIcon()
 {
 	//volume
 	volumebar.value = videoBarrage.volume*100;
-	if(videoBarrage.volume<=0)
+	if(videoBarrage.volume<=0 || videoBarrage.muted)
 		volumebtn.classList.add("mute-icon");
 	else
 		volumebtn.classList.remove("mute-icon");
