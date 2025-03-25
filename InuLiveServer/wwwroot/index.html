@@ -133,7 +133,6 @@
 		window.addEventListener('StreamInfoReady', function (e) {
 			streamInfo = e.detail;
 			var urls = streamInfo.urls;
-
 			var stream_title = $('#stream_title')[0];
 			var stream_subtitle = $('#stream_subtitle')[0];
 			var stream_game = $('#stream_game')[0];
@@ -142,10 +141,13 @@
 			stream_subtitle.innerHTML = streamInfo.subtitle;
 			stream_game.innerHTML = streamInfo.game;
 
-			for (var i = 0; i < urls.length; i++) 
+			if(urls && urls.length > 0)
 			{
-				if(StartPlayer(urls[i],streamInfo.isLive))
-					break;	
+				for (var i = 0; i < urls.length; i++) 
+				{
+					if(StartPlayer(urls[i],streamInfo.isLive))
+						break;	
+				}
 			}
 		}, false);
 

@@ -13,30 +13,20 @@ namespace InuLiveServer.Controllers
     public class StreamInfoController : Controller
     {
         // push
-        // http://192.168.88.10:1985/rtc/v1/whip/?app=live&stream=livestream
-        // rtmp://192.168.88.10/live/livestream
+        // rtmp://inuliveserver-srs.bndsbja0b7eje2gu.eastasia.azurecontainer.io/live/livestream
+        // http://inuliveserver-srs.bndsbja0b7eje2gu.eastasia.azurecontainer.io:1985/rtc/v1/whip/?app=live&stream=livestream
         // pull
-        // http://inuuu.duckdns.org:8080/live/livestream.flv
-        // http://inuuu.duckdns.org:8080/live/livestream.m3u8
+        // http://inuliveserver-srs.bndsbja0b7eje2gu.eastasia.azurecontainer.io:8080/live/livestream.flv
+        // http://inuliveserver-srs.bndsbja0b7eje2gu.eastasia.azurecontainer.io:8080/live/livestream.m3u8
+        // http://inuliveserver-srs.bndsbja0b7eje2gu.eastasia.azurecontainer.io:1985/rtc/v1/whep/?app=live&stream=livestream
 
         // static readonly StreamInfo DefaultStreamInfo = null;
 
-        // static readonly StreamInfo DefaultStreamInfo = new StreamInfo()
-        // {
-        //     title = "以努的狗窩",
-        //     subtitle = "實況準備中",
-        //     game = null,
-        //     urls = new List<string>{
-        //         "http://inuuu.duckdns.org:8081/live/livestream.flv",
-	    //         "http://inuuu.duckdns.org:8081/live/livestream.m3u8"
-        //     },
-        //     isLive = null
-        // };
         static readonly StreamInfo DefaultStreamInfo = new StreamInfo()
         {
-            title = "InuLiveDemo",
-            subtitle = "BigBuckBunny",
-            game = "Movie",
+            title = "HTTP低延遲直播",
+            subtitle = "Big Buck Bunny",
+            game = "DEMO",
             urls = new List<string>{
                 "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
             },
