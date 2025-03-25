@@ -12,16 +12,21 @@ namespace InuLiveServer.Controllers
     [ApiController]
     public class StreamInfoController : Controller
     {
+
+        // "http://inuuu.duckdns.org:8081/live/livestream.flv",
+        // "http://inuuu.duckdns.org:8081/live/livestream.m3u8"
+
+        // static readonly StreamInfo DefaultStreamInfo = null;
+
         // static readonly StreamInfo DefaultStreamInfo = new StreamInfo()
         // {
         //     title = "以努的狗窩",
         //     subtitle = "實況準備中",
         //     game = null,
-        //     urls = null,
-        //     // new List<string>{
-        //     //     "http://192.168.88.10:8081/live/livestream.flv",
-	    //     //     "http://192.168.88.10:8081/live/livestream.m3u8"
-        //     // },
+        //     urls = new List<string>{
+        //         "http://inuuu.duckdns.org:8081/live/livestream.flv",
+	    //         "http://inuuu.duckdns.org:8081/live/livestream.m3u8"
+        //     },
         //     isLive = null
         // };
         static readonly StreamInfo DefaultStreamInfo = new StreamInfo()

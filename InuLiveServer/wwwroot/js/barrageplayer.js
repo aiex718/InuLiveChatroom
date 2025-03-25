@@ -88,12 +88,15 @@ window.addEventListener("resize", function() {
 	resetCanvasSize();
 });
 
+
+
 function StartPlayer(video_url,isLive)
 {
 	//var httpflvUrl = 'http://'+ document.location.hostname +':8081/live/livestream.flv';
 	//var hlsUrl = 'http://'+ document.location.hostname +':8081/live/livestream.m3u8';
 	//var httpflvUrl = 'http://192.168.88.10:8081/live/livestream.flv';
 	//var hlsUrl = 'http://192.168.88.10:8081/live/livestream.m3u8';
+
 	if(video_url.endsWith(".flv"))
 	{
 		if(!mpegts.isSupported())
@@ -106,7 +109,7 @@ function StartPlayer(video_url,isLive)
 		
 		player = mpegts.createPlayer({
 			type: 'flv',
-			isLive: true,
+			isLive: isLive,
 			url: video_url
 		});
 
@@ -131,8 +134,8 @@ function StartPlayer(video_url,isLive)
 		player.attachMediaElement(videoBarrage);
 		player.load();
 	}
-	else if(video_url.endsWith(".m3u8")) 
-	{		
+	else if(video_url.endsWith(".m3u8") && !isIOSSafari()) 
+	{
 		if(!Hls.isSupported())
 		{
 			console.warn('HLS.js is not supported');
@@ -332,4 +335,11 @@ function RefreshPlayerIcon()
 		fullbtn.classList.add("minimize-icon");
 	else
 		fullbtn.classList.remove("minimize-icon");
+}
+
+function isIOSSafari() {
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    return isIOS && isSafari;
 }
