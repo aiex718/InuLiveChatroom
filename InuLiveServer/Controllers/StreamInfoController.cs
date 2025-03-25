@@ -24,7 +24,7 @@ namespace InuLiveServer.Controllers
 
         static readonly StreamInfo DefaultStreamInfo = new StreamInfo()
         {
-            title = "HTTP低延遲直播",
+            title = "InuLive",
             subtitle = "Big Buck Bunny",
             game = "DEMO",
             urls = new List<string>{
