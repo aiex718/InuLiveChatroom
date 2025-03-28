@@ -1,10 +1,11 @@
-## InuLiveServer ##
-A HTML5 video streaming front-end with barrage player using flv.js, roll-back to hls.js if flv.js not supported.
+## InuLiveChatroom ##
 
-Support Desktop, tablet and mobile browser.
+HTML5 video streaming front-end featuring a barrage player. It utilizes `mpegts.js` for streaming and automatically falls back to `hls.js` when unsupported. 
 
-Embedded Chat room backend, implemented using Signal-R.
+Compatible with desktop, tablet, and mobile browsers.
 
-Barrage player forked from [zhangxinxu](http://www.zhangxinxu.com/wordpress/?p=6386).
+The embedded chat room backend is implemented using SignalR, facilitating real-time communication among users.
 
-Demo available at https://inuliveserver.azurewebsites.net/
+The barrage player is adapted from [zhangxinxu's implementation](http://www.zhangxinxu.com/wordpress/?p=6386), providing an interactive and engaging viewing experience.
+
+A live demo is available at [http://inuliveserver.azurewebsites.net/](http://inuliveserver.azurewebsites.net/).
